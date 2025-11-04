@@ -3,8 +3,8 @@
 ## Getting Started
 1. Create the virtual environment and install dependencies
    ```bash
-   python3 -m venv .venv
-   . .venv/bin/activate
+   python3 -m venv venv
+   source venv/bin/activate
    pip install -r requirements.txt
    ```
 2. Apply migrations and seed the datasets
@@ -13,7 +13,7 @@
    python manage.py migrate
    python manage.py load_catalog_data
    python manage.py load_customer_profiles
-python manage.py register_model_artifacts
+   python manage.py register_model_artifacts
    ```
 3. Run the development server
    ```bash

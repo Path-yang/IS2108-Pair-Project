@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+auroramart/db.sqlite3
+auroramart/.env
+auroramart/staticfiles/
+auroramart/media/
+.DS_Store

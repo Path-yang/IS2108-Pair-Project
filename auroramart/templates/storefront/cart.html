@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Your Cart · AuroraMart{% endblock %}
+{% block content %}
+<header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+    <div>
+        <h1>Your Shopping Cart</h1>
+        <p class="muted">Review items, adjust quantities, and proceed to checkout.</p>
+    </div>
+    {% if basket.total_items %}
+        <a class="button" href="{% url 'storefront:checkout_shipping' %}">Proceed to checkout</a>
+    {% endif %}
+</header>
+
+{% if items %}
+    <section class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.product.name }}</strong>
+                            <p class="muted">{{ item.product.sku }}</p>
+                        </td>
+                        <td>${{ item.unit_price }}</td>
+                        <td>
+                            <form method="post" style="display:flex; gap:0.5rem; align-items:center;">
+                                {% csrf_token %}
+                                <input type="hidden" name="line_id" value="{{ item.id }}">
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="0" max="20" style="width:70px;">
+                                <button type="submit" style="background:#1a73e8;">Update</button>
+                            </form>
+                        </td>
+                        <td>${{ item.line_total|floatformat:2 }}</td>
+                        <td><a href="{% url 'storefront:product_detail' item.product.sku %}">View</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div style="margin-top:1rem; text-align:right;">
+            <strong>Total items:</strong> {{ basket.total_items }}<br>
+            <strong>Subtotal:</strong> ${{ basket.subtotal|floatformat:2 }}
+        </div>
+    </section>
+{% else %}
+    <p>Your cart is empty. <a href="{% url 'storefront:product_list' %}">Browse products</a></p>
+{% endif %}
+
+{% if recommendations %}
+<section style="margin-top:2rem;">
+    <h2>Recommended for you</h2>
+    <div class="card-grid">
+        {% for rec in recommendations %}
+            <article class="card">
+                <h3>{{ rec.name }}</h3>
+                <p class="muted">{{ rec.category.name }}</p>
+                <p>${{ rec.unit_price }}</p>
+                <a class="button" href="{% url 'storefront:product_detail' rec.sku %}">Add to cart</a>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} · AuroraMart{% endblock %}
+{% block content %}
+<article class="card" style="display:grid; gap:1.5rem;">
+    <header>
+        <h1>{{ product.name }}</h1>
+        <p class="muted">{{ product.category.name }}{% if product.subcategory %} › {{ product.subcategory.name }}{% endif %}</p>
+    </header>
+    <p>{{ product.description }}</p>
+    <p><strong>Price:</strong> ${{ product.unit_price }}</p>
+    <p><strong>Rating:</strong> {{ product.product_rating|default:"N/A" }}/5.0</p>
+    {% if product.quantity_on_hand > 0 %}
+        <form method="post" class="form-grid" style="max-width:320px;">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Add to cart</button>
+        </form>
+    {% else %}
+        <p style="color:#b91c1c; font-weight:600;">Out of stock</p>
+    {% endif %}
+</article>
+
+{% if recommendations %}
+<section style="margin-top:2rem;">
+    <h2>Frequently bought together</h2>
+    <div class="card-grid">
+        {% for rec in recommendations %}
+            <article class="card">
+                <h3>{{ rec.name }}</h3>
+                <p class="muted">{{ rec.category.name }}</p>
+                <p>${{ rec.unit_price }}</p>
+                <a class="button" href="{% url 'storefront:product_detail' rec.sku %}">View</a>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

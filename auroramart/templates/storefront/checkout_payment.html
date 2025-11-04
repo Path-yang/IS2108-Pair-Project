@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Payment Details · AuroraMart{% endblock %}
+{% block content %}
+<section class="card" style="max-width:520px; margin:0 auto;">
+    <h1>Payment details</h1>
+    <p class="muted">Use mock card details for this prototype—no real payment is processed.</p>
+    <form method="post" class="form-grid" style="margin-top:1rem;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+            <a class="button" href="{% url 'storefront:checkout_shipping' %}" style="background:#6b7280;">Back</a>
+            <button type="submit">Review order</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

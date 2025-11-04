@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Catalogue · AuroraMart Staff{% endblock %}
+{% block content %}
+<header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+    <div>
+        <h1>Product Catalogue</h1>
+        <p class="muted">Manage AuroraMart's inventory, prices, and availability.</p>
+    </div>
+    <div style="display:flex; gap:0.5rem;">
+        <a class="button" href="{% url 'catalog:product_create' %}">Add Product</a>
+        <a class="button" href="{% url 'catalog:catalog_upload' %}">Bulk Upload</a>
+        <a class="button" href="{% url 'catalog:category_management' %}">Categories</a>
+        <a class="button" href="{% url 'catalog:low_stock_list' %}">Low Stock ({{ low_stock_count }})</a>
+    </div>
+</header>
+
+<form method="get" class="card form-grid" style="margin-bottom:1.5rem;">
+    <div>
+        <label for="id_q">Search keywords</label>
+        <input type="text" id="id_q" name="q" value="{{ search_query }}" placeholder="SKU, product name, description">
+    </div>
+    <div>
+        <label for="id_category">Category</label>
+        <select id="id_category" name="category">
+            <option value="">All categories</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if selected_category|stringformat:'s' == category.id|stringformat:'s' %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <label style="display:flex; align-items:center; gap:0.5rem;">
+        <input type="checkbox" name="show_inactive" value="1" {% if show_inactive %}checked{% endif %}>
+        Show inactive products
+    </label>
+    <button type="submit">Apply filters</button>
+</form>
+
+<section class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price (SGD)</th>
+                <th>Stock</th>
+                <th>Reorder @</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.sku }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category.name }}{% if product.subcategory %} › {{ product.subcategory.name }}{% endif %}</td>
+                    <td>${{ product.unit_price }}</td>
+                    <td {% if product.quantity_on_hand <= product.reorder_quantity %}style="color:#b91c1c;"{% endif %}>
+                        {{ product.quantity_on_hand }}
+                    </td>
+                    <td>{{ product.reorder_quantity }}</td>
+                    <td>
+                        {% if product.is_active %}
+                            <span style="color:#047857;">Active</span>
+                        {% else %}
+                            <span style="color:#92400e;">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align:right;">
+                        <a href="{% url 'catalog:product_update' product.pk %}">Edit</a>
+                        {% if product.is_active %}
+                            <form method="post" action="{% url 'catalog:product_deactivate' product.pk %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="button" style="background:#b91c1c; margin-left:0.5rem;">Deactivate</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'catalog:product_reactivate' product.pk %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="button" style="background:#047857; margin-left:0.5rem;">Reactivate</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="8">No products match your filters.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if is_paginated %}
+        <div style="margin-top:1rem; display:flex; justify-content:flex-end; gap:0.75rem;">
+            {% if page_obj.has_previous %}
+                <a class="button" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&category={{ selected_category }}{% if show_inactive %}&show_inactive=1{% endif %}">Previous</a>
+            {% endif %}
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a class="button" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&category={{ selected_category }}{% if show_inactive %}&show_inactive=1{% endif %}">Next</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

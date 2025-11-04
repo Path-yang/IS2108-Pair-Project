@@ -1,11 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>AuroraMart</title>
-</head>
-<body>
-    <h1>AuroraMart Storefront</h1>
-    <p>This is a temporary placeholder. User stories will drive the final UI.</p>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}AuroraMart · Personalised Storefront{% endblock %}
+{% block content %}
+<section class="hero card" style="display:grid; gap:1.5rem; align-items:center;">
+    <div>
+        <h1>Everyday quality without the luxury markup.</h1>
+        <p>Discover curated picks based on your lifestyle, powered by AuroraMart's AI-first storefront.</p>
+        <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+            <a class="button" href="{% url 'storefront:onboarding' %}">Personalise my experience</a>
+            <a class="button" href="{% url 'storefront:product_list' %}" style="background:#6b7280;">Browse all products</a>
+        </div>
+    </div>
+</section>
+
+<section style="margin-top:2rem;">
+    <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+        <h2>Shop by Category</h2>
+        <a href="{% url 'storefront:product_list' %}">View all</a>
+    </header>
+    <div class="card-grid">
+        {% for category in featured_categories %}
+            <article class="card">
+                <h3>{{ category.name }}</h3>
+                <p>{{ category.product_count }} products</p>
+                <a class="button" href="{% url 'storefront:product_list' %}?category={{ category.id }}">Explore</a>
+            </article>
+        {% empty %}
+            <p>No categories available yet.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section style="margin-top:2rem;">
+    <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+        <h2>Trending now</h2>
+    </header>
+    <div class="card-grid">
+        {% for product in trending_products %}
+            <article class="card">
+                <h3>{{ product.name }}</h3>
+                <p class="muted">{{ product.category.name }}</p>
+                <p style="font-weight:700;">${{ product.unit_price }}</p>
+                <a class="button" href="{% url 'storefront:product_detail' product.sku %}">View details</a>
+            </article>
+        {% empty %}
+            <p>Products are being uploaded. Check back soon!</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section style="margin-top:2rem;">
+    <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+        <h2>Fresh arrivals</h2>
+    </header>
+    <div class="card-grid">
+        {% for product in new_arrivals %}
+            <article class="card">
+                <h3>{{ product.name }}</h3>
+                <p class="muted">{{ product.category.name }}</p>
+                <p style="font-weight:700;">${{ product.unit_price }}</p>
+                <a class="button" href="{% url 'storefront:product_detail' product.sku %}">View details</a>
+            </article>
+        {% empty %}
+            <p>We're getting ready to launch new arrivals.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

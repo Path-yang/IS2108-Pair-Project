@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Category Management · AuroraMart Staff{% endblock %}
+{% block content %}
+<header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+    <div>
+        <h1>Category Management</h1>
+        <p class="muted">Maintain the category and subcategory taxonomy that powers the storefront.</p>
+    </div>
+    <a class="button" href="{% url 'catalog:product_list' %}">Back to Catalogue</a>
+</header>
+
+<section class="card" style="margin-bottom:1.5rem;">
+    <h2>Add Category</h2>
+    <form method="post" class="form-grid">
+        {% csrf_token %}
+        {{ category_form.as_p }}
+        <button type="submit" name="category_submit">Add category</button>
+    </form>
+</section>
+
+<section class="card" style="margin-bottom:1.5rem;">
+    <h2>Add Subcategory</h2>
+    <form method="post" class="form-grid">
+        {% csrf_token %}
+        {{ subcategory_form.as_p }}
+        <button type="submit" name="subcategory_submit">Add subcategory</button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Existing Taxonomy</h2>
+    <div class="taxonomy">
+        {% for category in categories %}
+            <article style="margin-bottom:1rem;">
+                <h3>{{ category.name }}</h3>
+                {% if category.subcategories.all %}
+                    <ul>
+                        {% for subcategory in category.subcategories.all %}
+                            <li>{{ subcategory.name }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="muted">No subcategories yet.</p>
+                {% endif %}
+            </article>
+        {% empty %}
+            <p>No categories defined.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

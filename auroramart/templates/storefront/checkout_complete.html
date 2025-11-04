@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed · AuroraMart{% endblock %}
+{% block content %}
+<section class="card" style="max-width:520px; margin:0 auto; text-align:center;">
+    <h1>Thank you!</h1>
+    {% if order_number %}
+        <p>Your order <strong>{{ order_number }}</strong> has been placed successfully.</p>
+    {% else %}
+        <p>Your order has been placed successfully.</p>
+    {% endif %}
+    {% if shipping %}
+        <p>We'll ship to {{ shipping.full_name }} at {{ shipping.address_line_1 }} {{ shipping.city }} {{ shipping.postal_code }}.</p>
+    {% endif %}
+    <a class="button" href="{% url 'storefront:product_list' %}" style="margin-top:1.5rem;">Continue shopping</a>
+</section>
+{% endblock %}

@@ -151,3 +151,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
+
+LOGIN_URL = "staff_login"
+LOGIN_REDIRECT_URL = "catalog:product_list"
+
+DATASETS_DIR = BASE_DIR.parent / "IS2108 - AY2526S1 - Pair Project" / "data"
+MODELS_DIR = BASE_DIR.parent / "IS2108 - AY2526S1 - Pair Project" / "model"

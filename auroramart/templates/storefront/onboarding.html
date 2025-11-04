@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Tell us about you · AuroraMart{% endblock %}
+{% block content %}
+<section class="card">
+    <h1>Personalise your first session</h1>
+    <p>Answer a few quick questions and we'll tailor the storefront to your preferences using our decision tree model.</p>
+    <form method="post" class="form-grid" style="margin-top:1.5rem;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Show my curated picks</button>
+    </form>
+</section>
+{% endblock %}

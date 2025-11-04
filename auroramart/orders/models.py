@@ -30,6 +30,19 @@ class Basket(models.Model):
         owner = self.customer or self.session_key or "anonymous"
         return f"Basket({owner})"
 
+    @property
+    def subtotal(self):
+        from decimal import Decimal
+
+        return sum(
+            (item.quantity * item.unit_price for item in self.items.all()),
+            Decimal("0.00"),
+        )
+
+    @property
+    def total_items(self):
+        return sum(item.quantity for item in self.items.all())
+
 
 class BasketItem(models.Model):
     """Line items captured inside a basket."""
@@ -53,6 +66,10 @@ class BasketItem(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover - simple string repr
         return f"{self.product.sku} x {self.quantity}"
+
+    @property
+    def line_total(self):
+        return self.quantity * self.unit_price
 
 
 class Order(models.Model):

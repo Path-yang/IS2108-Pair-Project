@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Shipping Details · AuroraMart{% endblock %}
+{% block content %}
+<section class="card" style="max-width:520px; margin:0 auto;">
+    <h1>Shipping details</h1>
+    <p class="muted">Provide delivery information for this order.</p>
+    <form method="post" class="form-grid" style="margin-top:1rem;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+            <a class="button" href="{% url 'storefront:cart' %}" style="background:#6b7280;">Back to cart</a>
+            <button type="submit">Continue to payment</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

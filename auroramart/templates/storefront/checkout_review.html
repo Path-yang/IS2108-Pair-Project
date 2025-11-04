@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Review Order · AuroraMart{% endblock %}
+{% block content %}
+<section class="card">
+    <h1>Review &amp; confirm</h1>
+    <p class="muted">Confirm your items, shipping address, and payment method before placing the order.</p>
+    <h2 style="margin-top:1.5rem;">Items</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.line_total|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="text-align:right; margin-top:1rem;">
+        <strong>Total:</strong> ${{ basket.subtotal|floatformat:2 }}
+    </div>
+</section>
+
+<section class="card" style="margin-top:1.5rem;">
+    <h2>Shipping</h2>
+    <p>{{ shipping.full_name }}</p>
+    <p>{{ shipping.address_line_1 }}{% if shipping.address_line_2 %}, {{ shipping.address_line_2 }}{% endif %}</p>
+    <p>{{ shipping.city }} {{ shipping.postal_code }}</p>
+    <p>Contact: {{ shipping.contact_number }}</p>
+</section>
+
+<section class="card" style="margin-top:1.5rem;">
+    <h2>Payment</h2>
+    <p>Cardholder: {{ payment.cardholder_name }}</p>
+    <p>Card ending: **** {{ payment.card_number|slice:"-4:" }}</p>
+</section>
+
+<form method="post" style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.5rem;">
+    {% csrf_token %}
+    <a class="button" href="{% url 'storefront:checkout_payment' %}" style="background:#6b7280;">Back</a>
+    <button type="submit">Place order</button>
+</form>
+{% endblock %}

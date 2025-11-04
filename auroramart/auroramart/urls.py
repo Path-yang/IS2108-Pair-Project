@@ -18,6 +18,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +27,8 @@ urlpatterns = [
     path('api/catalog/', include('catalog.urls', namespace='catalog')),
     path('api/customers/', include('customers.urls', namespace='customers')),
     path('api/orders/', include('orders.urls', namespace='orders')),
+    path('staff/login/', auth_views.LoginView.as_view(template_name='staff/login.html'), name='staff_login'),
+    path('staff/logout/', auth_views.LogoutView.as_view(next_page='staff_login'), name='staff_logout'),
 ]
 
 if settings.DEBUG:

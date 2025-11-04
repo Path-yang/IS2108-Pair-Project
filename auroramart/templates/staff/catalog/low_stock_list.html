@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Low Stock Alerts · AuroraMart Staff{% endblock %}
+{% block content %}
+<header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+    <div>
+        <h1>Low Stock Alerts</h1>
+        <p class="muted">Products at or below the reorder threshold.</p>
+    </div>
+    <a class="button" href="{% url 'catalog:product_list' %}">Back to Catalogue</a>
+</header>
+
+<section class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>On Hand</th>
+                <th>Reorder</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.sku }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category.name }}</td>
+                    <td style="color:#b91c1c;">{{ product.quantity_on_hand }}</td>
+                    <td>{{ product.reorder_quantity }}</td>
+                    <td><a href="{% url 'catalog:product_update' product.pk %}">Update stock</a></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Great news! No products are currently under the reorder threshold.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

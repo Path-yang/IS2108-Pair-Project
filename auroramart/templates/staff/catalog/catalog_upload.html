@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Bulk Upload · AuroraMart Staff{% endblock %}
+{% block content %}
+<section class="card" style="max-width: 560px;">
+    <h1>Bulk Catalogue Upload</h1>
+    <p>Upload a CSV file that follows the same structure as the provided product dataset. Existing SKUs will be updated automatically.</p>
+    <form method="post" enctype="multipart/form-data" class="form-grid" style="margin-top:1rem;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Start import</button>
+        <a class="button" href="{% url 'catalog:product_list' %}" style="background:#6b7280; margin-left:0.5rem;">Cancel</a>
+    </form>
+</section>
+{% endblock %}

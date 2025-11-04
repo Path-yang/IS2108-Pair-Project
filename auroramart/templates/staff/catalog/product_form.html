@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ view.object|default_if_none:'New' }} Product · AuroraMart Staff{% endblock %}
+{% block content %}
+<section class="card">
+    <h1>{% if view.object %}Edit{% else %}Add{% endif %} Product</h1>
+    <form method="post" class="form-grid">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">{% if view.object %}Save changes{% else %}Create product{% endif %}</button>
+        <a class="button" href="{% url 'catalog:product_list' %}" style="background:#6b7280; margin-left:0.5rem;">Cancel</a>
+    </form>
+</section>
+{% endblock %}

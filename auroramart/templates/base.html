@@ -20,11 +20,17 @@
                         <a href="{% url 'catalog:dashboard' %}">Dashboard</a>
                         <a href="{% url 'catalog:product_list' %}">Staff Catalogue</a>
                         <a href="{% url 'customers:staff_customer_list' %}">Customers</a>
-                        <a href="{% url 'staff_logout' %}">Staff Logout</a>
+                        <form method="post" action="{% url 'staff_logout' %}" style="display:inline;margin-left:1rem;">
+                            {% csrf_token %}
+                            <button type="submit" style="background:none;border:none;padding:0;color:#1a73e8;font-weight:500;font-size:inherit;font-family:inherit;cursor:pointer;text-decoration:none;">Staff Logout</button>
+                        </form>
                     {% else %}
                         <a href="{% url 'customers:profile' %}">My Profile</a>
                         <a href="{% url 'customers:order_history' %}">Orders</a>
-                        <a href="{% url 'customers:logout' %}">Logout</a>
+                        <form method="post" action="{% url 'customers:logout' %}" style="display:inline;margin-left:1rem;">
+                            {% csrf_token %}
+                            <button type="submit" style="background:none;border:none;padding:0;color:#1a73e8;font-weight:500;font-size:inherit;font-family:inherit;cursor:pointer;text-decoration:none;">Logout</button>
+                        </form>
                     {% endif %}
                 {% else %}
                     <a href="{% url 'customers:login' %}">Login</a>

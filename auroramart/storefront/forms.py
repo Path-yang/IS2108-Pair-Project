@@ -70,12 +70,12 @@ class ProductFilterForm(forms.Form):
 
 
 class AddToCartForm(forms.Form):
-    quantity = forms.IntegerField(min_value=1, max_value=10, initial=1)
+    quantity = forms.IntegerField(min_value=1, initial=1)
 
 
 class UpdateCartForm(forms.Form):
     line_id = forms.IntegerField()
-    quantity = forms.IntegerField(min_value=0, max_value=20)
+    quantity = forms.IntegerField(min_value=0)
 
 
 class ShippingAddressForm(forms.Form):

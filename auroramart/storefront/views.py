@@ -142,8 +142,8 @@ class ProductDetailView(View):
         form.fields["quantity"].widget.attrs["max"] = max(product.quantity_on_hand, 1)
         if form.is_valid():
             quantity = form.cleaned_data["quantity"]
-            if product.quantity_on_hand < quantity:
-                messages.error(request, "Not enough stock available.")
+            if quantity > product.quantity_on_hand:
+                form.add_error("quantity", f"Only {product.quantity_on_hand} units available in stock.")
             else:
                 basket = order_services.get_or_create_session_basket(request)
                 order_services.add_product_to_basket(basket, product, quantity)

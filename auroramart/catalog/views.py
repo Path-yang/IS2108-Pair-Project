@@ -140,7 +140,7 @@ class CatalogUploadView(StaffRequiredMixin, generic.FormView):
 
     def form_valid(self, form):
         file = form.cleaned_data["file"]
-        decoded = file.read().decode("utf-8", errors="ignore")
+        decoded = file.read().decode("utf-8")
         reader = csv.DictReader(io.StringIO(decoded))
         created = 0
         updated = 0

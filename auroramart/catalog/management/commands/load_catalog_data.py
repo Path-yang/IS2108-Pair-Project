@@ -27,7 +27,7 @@ class Command(BaseCommand):
         created = 0
         updated = 0
 
-        with products_path.open(encoding="utf-8", errors="ignore") as f:
+        with products_path.open(encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 category_name = row["Product Category"].strip()

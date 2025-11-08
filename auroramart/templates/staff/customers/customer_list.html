@@ -8,7 +8,7 @@
     
     <div class="toolbar">
         <form method="get" class="search-form">
-            <input type="text" name="q" placeholder="Search by username, email, or name..." value="{{ search_query }}">
+            <input type="text" name="q" placeholder="Search by gender, occupation, category..." value="{{ search_query }}">
             <button type="submit" class="btn btn-primary">Search</button>
             {% if search_query %}
                 <a href="{% url 'customers:staff_customer_list' %}" class="btn btn-secondary">Clear</a>
@@ -21,32 +21,29 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Name</th>
-                        <th>Joined</th>
-                        <th>Status</th>
-                        <th>Has Profile</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Occupation</th>
+                        <th>Employment</th>
+                        <th>Income (SGD)</th>
+                        <th>Preferred Category</th>
+                        <th>Has Account</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for customer in customers %}
                         <tr>
-                            <td>{{ customer.username }}</td>
-                            <td>{{ customer.email }}</td>
-                            <td>{{ customer.get_full_name|default:"-" }}</td>
-                            <td>{{ customer.date_joined|date:"M d, Y" }}</td>
+                            <td>{{ customer.age }}</td>
+                            <td>{{ customer.get_gender_display }}</td>
+                            <td>{{ customer.occupation }}</td>
+                            <td>{{ customer.get_employment_status_display }}</td>
+                            <td>${{ customer.monthly_income_sgd|floatformat:2 }}</td>
+                            <td>{{ customer.preferred_category_label|default:"-" }}</td>
                             <td>
-                                {% if customer.is_active %}
-                                    <span class="badge badge-success">Active</span>
-                                {% else %}
-                                    <span class="badge badge-danger">Disabled</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if customer.customer_profile %}
-                                    <span class="badge badge-info">Yes</span>
+                                {% if customer.user %}
+                                    <span class="badge badge-success">Yes</span>
+                                    <small>({{ customer.user.username }})</small>
                                 {% else %}
                                     <span class="badge badge-secondary">No</span>
                                 {% endif %}

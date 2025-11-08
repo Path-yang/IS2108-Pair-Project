@@ -1,91 +1,99 @@
 {% extends "base.html" %}
 
-{% block title %}Customer Details - {{ customer.username }} - AuroraMart Staff{% endblock %}
+{% block title %}Customer Details - {{ customer.get_gender_display }}, {{ customer.age }} - AuroraMart Staff{% endblock %}
 
 {% block content %}
 <div class="staff-container">
     <div class="page-header">
-        <h1>Customer Details: {{ customer.username }}</h1>
+        <h1>Customer Profile Details</h1>
         <div class="actions">
-            <form method="post" action="{% url 'customers:staff_customer_toggle' customer.pk %}" style="display:inline;">
-                {% csrf_token %}
-                {% if customer.is_active %}
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Disable this customer account?')">
-                        Disable Account
-                    </button>
-                {% else %}
-                    <button type="submit" class="btn btn-success" onclick="return confirm('Enable this customer account?')">
-                        Enable Account
-                    </button>
-                {% endif %}
-            </form>
+            {% if customer.user and not customer.user.is_staff %}
+                <form method="post" action="{% url 'customers:staff_customer_toggle' customer.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    {% if customer.user.is_active %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Disable this customer account?')">
+                            Disable Account
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-success" onclick="return confirm('Enable this customer account?')">
+                            Enable Account
+                        </button>
+                    {% endif %}
+                </form>
+            {% endif %}
             <a href="{% url 'customers:staff_customer_list' %}" class="btn btn-secondary">Back to List</a>
         </div>
     </div>
     
     <div class="detail-sections">
         <section class="detail-section">
-            <h2>Account Information</h2>
+            <h2>Demographic Information</h2>
             <dl class="detail-list">
-                <dt>Username:</dt>
-                <dd>{{ customer.username }}</dd>
+                <dt>Age:</dt>
+                <dd>{{ customer.age }}</dd>
                 
-                <dt>Email:</dt>
-                <dd>{{ customer.email }}</dd>
+                <dt>Gender:</dt>
+                <dd>{{ customer.get_gender_display }}</dd>
                 
-                <dt>Full Name:</dt>
-                <dd>{{ customer.get_full_name|default:"-" }}</dd>
+                <dt>Employment Status:</dt>
+                <dd>{{ customer.get_employment_status_display }}</dd>
                 
-                <dt>Status:</dt>
-                <dd>
-                    {% if customer.is_active %}
-                        <span class="badge badge-success">Active</span>
-                    {% else %}
-                        <span class="badge badge-danger">Disabled</span>
-                    {% endif %}
-                </dd>
+                <dt>Occupation:</dt>
+                <dd>{{ customer.occupation }}</dd>
                 
-                <dt>Joined:</dt>
-                <dd>{{ customer.date_joined|date:"F d, Y g:i A" }}</dd>
+                <dt>Education:</dt>
+                <dd>{{ customer.education }}</dd>
                 
-                <dt>Last Login:</dt>
-                <dd>{{ customer.last_login|date:"F d, Y g:i A"|default:"Never" }}</dd>
+                <dt>Household Size:</dt>
+                <dd>{{ customer.household_size }}</dd>
+                
+                <dt>Has Children:</dt>
+                <dd>{{ customer.has_children|yesno:"Yes,No" }}</dd>
+                
+                <dt>Monthly Income (SGD):</dt>
+                <dd>${{ customer.monthly_income_sgd|floatformat:2 }}</dd>
+                
+                <dt>Preferred Category:</dt>
+                <dd>{{ customer.preferred_category_label|default:"-" }}</dd>
+                
+                <dt>Profile Created:</dt>
+                <dd>{{ customer.created_at|date:"F d, Y g:i A" }}</dd>
             </dl>
         </section>
         
-        {% if customer.customer_profile %}
+        {% if customer.user %}
             <section class="detail-section">
-                <h2>Profile Information</h2>
+                <h2>Account Information</h2>
                 <dl class="detail-list">
-                    <dt>Age:</dt>
-                    <dd>{{ customer.customer_profile.age|default:"-" }}</dd>
+                    <dt>Username:</dt>
+                    <dd>{{ customer.user.username }}</dd>
                     
-                    <dt>Gender:</dt>
-                    <dd>{{ customer.customer_profile.get_gender_display|default:"-" }}</dd>
+                    <dt>Email:</dt>
+                    <dd>{{ customer.user.email }}</dd>
                     
-                    <dt>Employment Status:</dt>
-                    <dd>{{ customer.customer_profile.get_employment_status_display|default:"-" }}</dd>
+                    <dt>Full Name:</dt>
+                    <dd>{{ customer.user.get_full_name|default:"-" }}</dd>
                     
-                    <dt>Occupation:</dt>
-                    <dd>{{ customer.customer_profile.get_occupation_display|default:"-" }}</dd>
+                    <dt>Status:</dt>
+                    <dd>
+                        {% if customer.user.is_active %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-danger">Disabled</span>
+                        {% endif %}
+                    </dd>
                     
-                    <dt>Education Level:</dt>
-                    <dd>{{ customer.customer_profile.get_education_level_display|default:"-" }}</dd>
+                    <dt>Joined:</dt>
+                    <dd>{{ customer.user.date_joined|date:"F d, Y g:i A" }}</dd>
                     
-                    <dt>Household Size:</dt>
-                    <dd>{{ customer.customer_profile.household_size|default:"-" }}</dd>
-                    
-                    <dt>Has Children:</dt>
-                    <dd>{{ customer.customer_profile.has_children|yesno:"Yes,No,-" }}</dd>
-                    
-                    <dt>Monthly Income (SGD):</dt>
-                    <dd>${{ customer.customer_profile.monthly_income_sgd|floatformat:2|default:"-" }}</dd>
+                    <dt>Last Login:</dt>
+                    <dd>{{ customer.user.last_login|date:"F d, Y g:i A"|default:"Never" }}</dd>
                 </dl>
             </section>
         {% else %}
             <section class="detail-section">
-                <h2>Profile Information</h2>
-                <p class="empty-state">Customer has not completed their profile.</p>
+                <h2>Account Information</h2>
+                <p class="empty-state">This customer profile does not have a linked user account.</p>
             </section>
         {% endif %}
         

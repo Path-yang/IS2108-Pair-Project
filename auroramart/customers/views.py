@@ -119,24 +119,25 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
 
 class StaffCustomerListView(StaffRequiredMixin, generic.ListView):
-    """Staff view to list all customers (ADM-09)."""
+    """Staff view to list all customers from CSV data (ADM-09)."""
     
     template_name = "staff/customers/customer_list.html"
     context_object_name = "customers"
     paginate_by = 25
     
     def get_queryset(self):
-        from django.contrib.auth.models import User
-        
-        queryset = User.objects.filter(is_staff=False).select_related("customer_profile").order_by("-date_joined")
+        queryset = CustomerProfile.objects.select_related("user", "preferred_category").order_by("-created_at")
         
         search = self.request.GET.get("q")
         if search:
             queryset = queryset.filter(
-                Q(username__icontains=search)
-                | Q(email__icontains=search)
-                | Q(first_name__icontains=search)
-                | Q(last_name__icontains=search)
+                Q(gender__icontains=search)
+                | Q(occupation__icontains=search)
+                | Q(employment_status__icontains=search)
+                | Q(education__icontains=search)
+                | Q(preferred_category_label__icontains=search)
+                | Q(user__username__icontains=search)
+                | Q(user__email__icontains=search)
             )
         
         return queryset
@@ -154,28 +155,38 @@ class StaffCustomerDetailView(StaffRequiredMixin, generic.DetailView):
     context_object_name = "customer"
     
     def get_queryset(self):
-        from django.contrib.auth.models import User
-        return User.objects.filter(is_staff=False).select_related("customer_profile")
+        return CustomerProfile.objects.select_related("user", "preferred_category")
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["orders"] = Order.objects.filter(
-            customer_email=self.object.email
-        ).order_by("-created_at")[:10]
+        # Get orders if user account is linked
+        if self.object.user:
+            ctx["orders"] = Order.objects.filter(
+                customer_email=self.object.user.email
+            ).order_by("-created_at")[:10]
+        else:
+            ctx["orders"] = Order.objects.none()
         return ctx
 
 
 class StaffCustomerToggleActiveView(StaffRequiredMixin, generic.View):
-    """Staff view to disable/enable customer accounts (ADM-11)."""
+    """Staff view to disable/enable customer accounts (ADM-11). Only works if User account is linked."""
     
     def post(self, request, pk):
-        from django.contrib.auth.models import User
+        profile = get_object_or_404(CustomerProfile, pk=pk)
         
-        customer = get_object_or_404(User, pk=pk, is_staff=False)
-        customer.is_active = not customer.is_active
-        customer.save()
+        if not profile.user:
+            messages.error(request, "This customer profile does not have a linked user account.")
+            return redirect("customers:staff_customer_detail", pk=pk)
         
-        status = "enabled" if customer.is_active else "disabled"
-        messages.success(request, f"Customer account {customer.username} has been {status}.")
+        if profile.user.is_staff:
+            messages.error(request, "Cannot modify staff accounts.")
+            return redirect("customers:staff_customer_detail", pk=pk)
+        
+        profile.user.is_active = not profile.user.is_active
+        profile.user.save()
+        
+        status = "enabled" if profile.user.is_active else "disabled"
+        messages.success(request, f"Customer account {profile.user.username} has been {status}.")
         return redirect("customers:staff_customer_detail", pk=pk)
 

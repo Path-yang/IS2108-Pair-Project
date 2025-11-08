@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Order History - AuroraMart{% endblock %}
+
+{% block content %}
+<div class="order-history-container">
+    <h1>Order History</h1>
+    
+    {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+                <div class="order-card">
+                    <div class="order-header">
+                        <h3>Order #{{ order.order_number }}</h3>
+                        <span class="order-date">{{ order.created_at|date:"F d, Y" }}</span>
+                    </div>
+                    
+                    <div class="order-details">
+                        <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+                        <p><strong>Total:</strong> ${{ order.total_amount }}</p>
+                        
+                        {% if order.shipping_address %}
+                            <p><strong>Shipped to:</strong> {{ order.shipping_address }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="order-items">
+                        <h4>Items:</h4>
+                        <ul>
+                            {% for item in order.items.all %}
+                                <li>{{ item.product_name }} - Qty: {{ item.quantity }} - ${{ item.price }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1" class="btn btn-secondary">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">Previous</a>
+                {% endif %}
+                
+                <span class="page-info">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary">Last</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <p>You haven't placed any orders yet.</p>
+            <a href="{% url 'storefront:product_list' %}" class="btn btn-primary">Start Shopping</a>
+        </div>
+    {% endif %}
+    
+    <div class="profile-link">
+        <a href="{% url 'customers:profile' %}" class="btn btn-secondary">Back to Profile</a>
+    </div>
+</div>
+{% endblock %}

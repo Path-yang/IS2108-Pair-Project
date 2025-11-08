@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Management - AuroraMart Staff{% endblock %}
+
+{% block content %}
+<div class="staff-container">
+    <h1>Customer Management</h1>
+    
+    <div class="toolbar">
+        <form method="get" class="search-form">
+            <input type="text" name="q" placeholder="Search by username, email, or name..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary">Search</button>
+            {% if search_query %}
+                <a href="{% url 'customers:staff_customer_list' %}" class="btn btn-secondary">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+    
+    {% if customers %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Joined</th>
+                        <th>Status</th>
+                        <th>Has Profile</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                        <tr>
+                            <td>{{ customer.username }}</td>
+                            <td>{{ customer.email }}</td>
+                            <td>{{ customer.get_full_name|default:"-" }}</td>
+                            <td>{{ customer.date_joined|date:"M d, Y" }}</td>
+                            <td>
+                                {% if customer.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Disabled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if customer.customer_profile %}
+                                    <span class="badge badge-info">Yes</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'customers:staff_customer_detail' customer.pk %}" class="btn btn-sm btn-primary">View</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary">Previous</a>
+                {% endif %}
+                
+                <span class="page-info">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary">Last</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <p>No customers found{% if search_query %} matching "{{ search_query }}"{% endif %}.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

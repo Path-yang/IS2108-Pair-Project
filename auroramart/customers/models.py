@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 from catalog.models import ProductCategory
@@ -21,6 +22,14 @@ class CustomerProfile(models.Model):
         ("Retired", "Retired"),
     ]
 
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="customer_profile",
+        null=True,
+        blank=True,
+        help_text="Optional link to user account for registered customers",
+    )
     age = models.PositiveSmallIntegerField()
     gender = models.CharField(max_length=16, choices=GENDER_CHOICES)
     employment_status = models.CharField(max_length=32, choices=EMPLOYMENT_CHOICES)

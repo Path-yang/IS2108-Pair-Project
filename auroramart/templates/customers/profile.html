@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - AuroraMart{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <h1>My Profile</h1>
+    
+    <div class="profile-sections">
+        <section class="profile-section">
+            <h2>Account Information</h2>
+            <form method="post" class="standard-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    {{ user_form.username.label_tag }}
+                    {{ user_form.username }}
+                    {% if user_form.username.errors %}
+                        <span class="field-error">{{ user_form.username.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ user_form.email.label_tag }}
+                    {{ user_form.email }}
+                    {% if user_form.email.errors %}
+                        <span class="field-error">{{ user_form.email.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ user_form.first_name.label_tag }}
+                    {{ user_form.first_name }}
+                    {% if user_form.first_name.errors %}
+                        <span class="field-error">{{ user_form.first_name.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ user_form.last_name.label_tag }}
+                    {{ user_form.last_name }}
+                    {% if user_form.last_name.errors %}
+                        <span class="field-error">{{ user_form.last_name.errors.0 }}</span>
+                    {% endif %}
+                </div>
+        </section>
+        
+        <section class="profile-section">
+            <h2>Personal Information</h2>
+            <p class="help-text">Help us personalize your shopping experience!</p>
+            
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ profile_form.age.label_tag }}
+                        {{ profile_form.age }}
+                        {% if profile_form.age.errors %}
+                            <span class="field-error">{{ profile_form.age.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ profile_form.gender.label_tag }}
+                        {{ profile_form.gender }}
+                        {% if profile_form.gender.errors %}
+                            <span class="field-error">{{ profile_form.gender.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ profile_form.employment_status.label_tag }}
+                        {{ profile_form.employment_status }}
+                        {% if profile_form.employment_status.errors %}
+                            <span class="field-error">{{ profile_form.employment_status.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ profile_form.occupation.label_tag }}
+                        {{ profile_form.occupation }}
+                        {% if profile_form.occupation.errors %}
+                            <span class="field-error">{{ profile_form.occupation.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ profile_form.education_level.label_tag }}
+                        {{ profile_form.education_level }}
+                        {% if profile_form.education_level.errors %}
+                            <span class="field-error">{{ profile_form.education_level.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ profile_form.household_size.label_tag }}
+                        {{ profile_form.household_size }}
+                        {% if profile_form.household_size.errors %}
+                            <span class="field-error">{{ profile_form.household_size.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ profile_form.has_children.label_tag }}
+                        {{ profile_form.has_children }}
+                        {% if profile_form.has_children.errors %}
+                            <span class="field-error">{{ profile_form.has_children.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ profile_form.monthly_income_sgd.label_tag }}
+                        {{ profile_form.monthly_income_sgd }}
+                        {% if profile_form.monthly_income_sgd.errors %}
+                            <span class="field-error">{{ profile_form.monthly_income_sgd.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{% url 'customers:order_history' %}" class="btn btn-secondary">View Order History</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

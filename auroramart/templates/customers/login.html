@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Login - AuroraMart{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Welcome Back!</h1>
+    <p>Log in to your AuroraMart account</p>
+    
+    <form method="post" class="standard-form">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="error-summary">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        
+        <div class="form-group">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {% if form.username.errors %}
+                <span class="field-error">{{ form.username.errors.0 }}</span>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {% if form.password.errors %}
+                <span class="field-error">{{ form.password.errors.0 }}</span>
+            {% endif %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Log In</button>
+        </div>
+        
+        <input type="hidden" name="next" value="{{ next }}">
+    </form>
+    
+    <p class="form-footer">
+        Don't have an account? <a href="{% url 'customers:register' %}">Register here</a>
+    </p>
+    
+    <p class="form-footer">
+        <a href="#">Forgot your password?</a>
+    </p>
+</div>
+{% endblock %}

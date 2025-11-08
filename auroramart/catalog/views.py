@@ -4,19 +4,23 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import F, Q
+from django.db.models import Count, F, Q
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views import View, generic
+
+from customers.models import CustomerProfile
+from orders.models import Order
 
 from .forms import (
     CatalogUploadForm,
     ProductCategoryForm,
     ProductForm,
     ProductSubcategoryForm,
+    ReviewForm,
 )
-from .models import Product, ProductCategory, ProductSubcategory
+from .models import Product, ProductCategory, ProductSubcategory, Review
 
 
 def healthcheck(request):
@@ -35,6 +39,50 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
             messages.error(self.request, "You do not have access to staff tools.")
             return redirect("storefront:home")
         return super().handle_no_permission()
+
+
+class StaffDashboardView(StaffRequiredMixin, generic.TemplateView):
+    """Staff dashboard with key statistics (ADM-13)."""
+    
+    template_name = "staff/dashboard.html"
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        
+        # Product statistics
+        total_products = Product.objects.count()
+        active_products = Product.objects.filter(is_active=True).count()
+        low_stock_products = Product.objects.filter(
+            quantity_on_hand__lte=F("reorder_quantity"),
+            is_active=True
+        ).count()
+        
+        # Customer statistics
+        from django.contrib.auth.models import User
+        total_customers = User.objects.filter(is_staff=False).count()
+        customers_with_profiles = CustomerProfile.objects.filter(user__isnull=False).count()
+        
+        # Order statistics
+        total_orders = Order.objects.count()
+        recent_orders = Order.objects.order_by("-created_at")[:5]
+        
+        # Category breakdown
+        category_stats = ProductCategory.objects.annotate(
+            product_count=Count("products")
+        ).order_by("-product_count")[:5]
+        
+        ctx.update({
+            "total_products": total_products,
+            "active_products": active_products,
+            "low_stock_products": low_stock_products,
+            "total_customers": total_customers,
+            "customers_with_profiles": customers_with_profiles,
+            "total_orders": total_orders,
+            "recent_orders": recent_orders,
+            "top_categories": category_stats,
+        })
+        
+        return ctx
 
 
 class ProductListView(StaffRequiredMixin, generic.ListView):
@@ -211,3 +259,118 @@ class CategoryManagementView(StaffRequiredMixin, generic.TemplateView):
             else:
                 messages.error(request, "Unable to add subcategory.")
         return redirect("catalog:category_management")
+
+
+class ProductExportView(StaffRequiredMixin, View):
+    """Export all products to CSV (ADM-14)."""
+    
+    def get(self, request):
+        from django.http import HttpResponse
+        import csv
+        
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="auroramart_products_export.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            "SKU Code",
+            "Product Name",
+            "Description",
+            "Category",
+            "Subcategory",
+            "Unit Price",
+            "Product Rating",
+            "Quantity on Hand",
+            "Reorder Quantity",
+            "Active Status"
+        ])
+        
+        products = Product.objects.select_related("category", "subcategory").order_by("sku")
+        
+        for product in products:
+            writer.writerow([
+                product.sku,
+                product.name,
+                product.description,
+                product.category.name if product.category else "",
+                product.subcategory.name if product.subcategory else "",
+                product.unit_price,
+                product.product_rating if product.product_rating else "",
+                product.quantity_on_hand,
+                product.reorder_quantity,
+                "Active" if product.is_active else "Inactive"
+            ])
+        
+        return response
+
+
+# Review views (CUST-07, CUST-08)
+
+class ReviewCreateView(LoginRequiredMixin, View):
+    """Create a review for a product (CUST-07)."""
+    
+    login_url = "customers:login"
+    
+    def post(self, request, product_pk):
+        from django.shortcuts import get_object_or_404
+        
+        product = get_object_or_404(Product, pk=product_pk, is_active=True)
+        form = ReviewForm(request.POST)
+        
+        if form.is_valid():
+            # Check if user already reviewed this product
+            existing_review = Review.objects.filter(
+                product=product,
+                user=request.user
+            ).first()
+            
+            if existing_review:
+                messages.warning(request, "You have already reviewed this product. You can edit your existing review.")
+            else:
+                review = form.save(commit=False)
+                review.product = product
+                review.user = request.user
+                review.save()
+                messages.success(request, "Thank you for your review!")
+        else:
+            messages.error(request, "Unable to submit review. Please check your rating.")
+        
+        return redirect("storefront:product_detail", pk=product_pk)
+
+
+class ReviewUpdateView(LoginRequiredMixin, View):
+    """Edit a review (CUST-08)."""
+    
+    login_url = "customers:login"
+    
+    def post(self, request, pk):
+        from django.shortcuts import get_object_or_404
+        
+        review = get_object_or_404(Review, pk=pk, user=request.user)
+        form = ReviewForm(request.POST, instance=review)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Review updated successfully!")
+        else:
+            messages.error(request, "Unable to update review.")
+        
+        return redirect("storefront:product_detail", pk=review.product.pk)
+
+
+class ReviewDeleteView(LoginRequiredMixin, View):
+    """Delete a review (CUST-08)."""
+    
+    login_url = "customers:login"
+    
+    def post(self, request, pk):
+        from django.shortcuts import get_object_or_404
+        
+        review = get_object_or_404(Review, pk=pk, user=request.user)
+        product_pk = review.product.pk
+        review.delete()
+        messages.success(request, "Review deleted successfully.")
+        
+        return redirect("storefront:product_detail", pk=product_pk)
+
+

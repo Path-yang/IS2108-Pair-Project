@@ -35,4 +35,97 @@
     </div>
 </section>
 {% endif %}
+
+<section style="margin-top:2rem;">
+    <h2>Customer Reviews</h2>
+    
+    {% if user_review %}
+        <div class="card" style="background:#f0fdf4; border-color:#86efac; margin-bottom:1.5rem;">
+            <h3>Your Review</h3>
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                <strong>Rating:</strong>
+                <span style="color:#f59e0b;">{% for i in "12345" %}{% if forloop.counter <= user_review.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+            </div>
+            {% if user_review.comment %}
+                <p>{{ user_review.comment }}</p>
+            {% endif %}
+            <p class="muted" style="margin-bottom:1rem;">Posted on {{ user_review.created_at|date:"F d, Y" }}</p>
+            <div style="display:flex; gap:0.5rem;">
+                <button onclick="document.getElementById('edit-review-form').style.display='block'; this.parentElement.parentElement.style.display='none';" class="button">Edit Review</button>
+                <form method="post" action="{% url 'catalog:review_delete' user_review.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="button" style="background:#dc2626;" onclick="return confirm('Delete your review?')">Delete Review</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="edit-review-form" class="card" style="display:none; margin-bottom:1.5rem;">
+            <h3>Edit Your Review</h3>
+            <form method="post" action="{% url 'catalog:review_update' user_review.pk %}">
+                {% csrf_token %}
+                <div style="margin-bottom:1rem;">
+                    <label for="id_rating_edit">Your Rating</label>
+                    <select name="rating" id="id_rating_edit" required>
+                        {% for i in "12345" %}
+                            <option value="{{ forloop.counter }}" {% if forloop.counter == user_review.rating %}selected{% endif %}>{{ forloop.counter }} Star{% if forloop.counter != 1 %}s{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label for="id_comment_edit">Your Review (optional)</label>
+                    <textarea name="comment" id="id_comment_edit" rows="4" placeholder="Share your experience with this product...">{{ user_review.comment }}</textarea>
+                </div>
+                <div style="display:flex; gap:0.5rem;">
+                    <button type="submit" class="button">Save Changes</button>
+                    <button type="button" class="button" onclick="document.getElementById('edit-review-form').style.display='none'; document.querySelector('.card[style*=f0fdf4]').style.display='block';">Cancel</button>
+                </div>
+            </form>
+        </div>
+    {% elif review_form %}
+        <div class="card" style="margin-bottom:1.5rem;">
+            <h3>Write a Review</h3>
+            <form method="post" action="{% url 'catalog:review_create' product.pk %}">
+                {% csrf_token %}
+                <div style="margin-bottom:1rem;">
+                    {{ review_form.rating.label_tag }}
+                    {{ review_form.rating }}
+                </div>
+                <div style="margin-bottom:1rem;">
+                    {{ review_form.comment.label_tag }}
+                    {{ review_form.comment }}
+                </div>
+                <button type="submit" class="button">Submit Review</button>
+            </form>
+        </div>
+    {% elif not user.is_authenticated %}
+        <div class="card" style="margin-bottom:1.5rem; background:#fef3c7; border-color:#fbbf24;">
+            <p><a href="{% url 'customers:login' %}?next={{ request.path }}">Log in</a> to write a review for this product.</p>
+        </div>
+    {% endif %}
+    
+    {% if reviews %}
+        <div style="display:grid; gap:1rem;">
+            {% for review in reviews %}
+                {% if review != user_review %}
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem;">
+                            <strong>{{ review.user.username }}</strong>
+                            <span style="color:#f59e0b;">{% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+                        </div>
+                        {% if review.comment %}
+                            <p>{{ review.comment }}</p>
+                        {% endif %}
+                        <p class="muted" style="margin-top:0.5rem;">{{ review.created_at|date:"F d, Y" }}</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        {% if not user_review %}
+            <div class="card">
+                <p class="muted">No reviews yet. Be the first to review this product!</p>
+            </div>
+        {% endif %}
+    {% endif %}
+</section>
 {% endblock %}

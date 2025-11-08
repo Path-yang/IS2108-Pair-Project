@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard - AuroraMart{% endblock %}
+
+{% block content %}
+<div class="staff-container">
+    <h1>Staff Dashboard</h1>
+    
+    <div class="dashboard-grid">
+        <section class="dashboard-card">
+            <h2>Product Catalog</h2>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Total Products</span>
+                    <span class="stat-value">{{ total_products }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Products</span>
+                    <span class="stat-value">{{ active_products }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Low Stock Items</span>
+                    <span class="stat-value {% if low_stock_products > 0 %}stat-warning{% endif %}">{{ low_stock_products }}</span>
+                </div>
+            </div>
+            <div class="card-actions">
+                <a href="{% url 'catalog:product_list' %}" class="btn btn-primary">View Catalog</a>
+                <a href="{% url 'catalog:low_stock_list' %}" class="btn btn-secondary">Low Stock</a>
+            </div>
+        </section>
+        
+        <section class="dashboard-card">
+            <h2>Customers</h2>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Total Customers</span>
+                    <span class="stat-value">{{ total_customers }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">With Profiles</span>
+                    <span class="stat-value">{{ customers_with_profiles }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Profile Completion</span>
+                    <span class="stat-value">
+                        {% if total_customers > 0 %}
+                            {{ customers_with_profiles|floatformat:0 }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="card-actions">
+                <a href="{% url 'customers:staff_customer_list' %}" class="btn btn-primary">View Customers</a>
+            </div>
+        </section>
+        
+        <section class="dashboard-card">
+            <h2>Orders</h2>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Total Orders</span>
+                    <span class="stat-value">{{ total_orders }}</span>
+                </div>
+            </div>
+            <div class="card-actions">
+                <a href="#" class="btn btn-secondary">View All Orders</a>
+            </div>
+        </section>
+        
+        <section class="dashboard-card">
+            <h2>Top Categories</h2>
+            {% if top_categories %}
+                <ul class="category-list">
+                    {% for category in top_categories %}
+                        <li>
+                            <span class="category-name">{{ category.name }}</span>
+                            <span class="product-count">{{ category.product_count }} products</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-state">No categories found.</p>
+            {% endif %}
+            <div class="card-actions">
+                <a href="{% url 'catalog:category_management' %}" class="btn btn-secondary">Manage Categories</a>
+            </div>
+        </section>
+    </div>
+    
+    <section class="recent-orders-section">
+        <h2>Recent Orders</h2>
+        {% if recent_orders %}
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.customer_email }}</td>
+                                <td>{{ order.created_at|date:"M d, Y g:i A" }}</td>
+                                <td>{{ order.get_status_display }}</td>
+                                <td>${{ order.total_amount }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty-state">No orders yet.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

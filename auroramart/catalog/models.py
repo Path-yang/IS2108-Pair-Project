@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.text import slugify
 
@@ -82,4 +84,35 @@ class Product(models.Model):
     def __str__(self) -> str:  # pragma: no cover - simple string repr
         return f"{self.sku} – {self.name}"
 
-# Create your models here.
+
+class Review(models.Model):
+    """Customer review for a product (CUST-07, CUST-08)."""
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="reviews",
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="reviews",
+    )
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Rating from 1 (worst) to 5 (best)",
+    )
+    comment = models.TextField(
+        blank=True,
+        help_text="Optional review comment",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        unique_together = ("product", "user")  # One review per user per product
+
+    def __str__(self) -> str:  # pragma: no cover - simple string repr
+        return f"{self.user.username} - {self.product.name} ({self.rating}/5)"
+

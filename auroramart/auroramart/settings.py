@@ -154,6 +154,7 @@ REST_FRAMEWORK = {
 
 LOGIN_URL = "staff_login"
 LOGIN_REDIRECT_URL = "catalog:product_list"
+LOGOUT_REDIRECT_URL = "storefront:home"
 
 DATASETS_DIR = BASE_DIR.parent / "IS2108 - AY2526S1 - Pair Project" / "data"
 MODELS_DIR = BASE_DIR.parent / "IS2108 - AY2526S1 - Pair Project" / "model"

@@ -114,6 +114,9 @@ class ProductDetailView(View):
     template_name = "storefront/product_detail.html"
 
     def get(self, request, sku):
+        from catalog.forms import ReviewForm
+        from catalog.models import Review
+        
         product = get_object_or_404(
             Product.objects.select_related("category", "subcategory"),
             sku=sku,
@@ -122,6 +125,18 @@ class ProductDetailView(View):
         form = AddToCartForm()
         form.fields["quantity"].widget.attrs["max"] = max(product.quantity_on_hand, 1)
         recommendations = recommend_associated_products([product.sku], limit=4)
+        
+        # Get reviews for this product
+        reviews = Review.objects.filter(product=product).select_related("user").order_by("-created_at")
+        
+        # Check if current user has already reviewed
+        user_review = None
+        if request.user.is_authenticated:
+            user_review = reviews.filter(user=request.user).first()
+        
+        # Review form for authenticated users who haven't reviewed yet
+        review_form = ReviewForm() if request.user.is_authenticated and not user_review else None
+        
         return render(
             request,
             self.template_name,
@@ -129,6 +144,9 @@ class ProductDetailView(View):
                 "product": product,
                 "form": form,
                 "recommendations": recommendations,
+                "reviews": reviews,
+                "user_review": user_review,
+                "review_form": review_form,
             },
         )
 

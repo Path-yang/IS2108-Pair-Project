@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Register - AuroraMart{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Create Your Account</h1>
+    <p>Join AuroraMart to track your orders and get personalized recommendations!</p>
+    
+    <form method="post" class="standard-form">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="error-summary">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        
+        <div class="form-group">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {% if form.username.errors %}
+                <span class="field-error">{{ form.username.errors.0 }}</span>
+            {% endif %}
+            <small class="help-text">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</small>
+        </div>
+        
+        <div class="form-group">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {% if form.email.errors %}
+                <span class="field-error">{{ form.email.errors.0 }}</span>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.first_name.label_tag }}
+            {{ form.first_name }}
+            {% if form.first_name.errors %}
+                <span class="field-error">{{ form.first_name.errors.0 }}</span>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.last_name.label_tag }}
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+                <span class="field-error">{{ form.last_name.errors.0 }}</span>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+                <span class="field-error">{{ form.password1.errors.0 }}</span>
+            {% endif %}
+            <small class="help-text">Your password must contain at least 8 characters and can't be entirely numeric.</small>
+        </div>
+        
+        <div class="form-group">
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+                <span class="field-error">{{ form.password2.errors.0 }}</span>
+            {% endif %}
+            <small class="help-text">Enter the same password as before, for verification.</small>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Account</button>
+        </div>
+    </form>
+    
+    <p class="form-footer">
+        Already have an account? <a href="{% url 'customers:login' %}">Log in here</a>
+    </p>
+</div>
+{% endblock %}

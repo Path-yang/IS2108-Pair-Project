@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Details - {{ customer.username }} - AuroraMart Staff{% endblock %}
+
+{% block content %}
+<div class="staff-container">
+    <div class="page-header">
+        <h1>Customer Details: {{ customer.username }}</h1>
+        <div class="actions">
+            <form method="post" action="{% url 'customers:staff_customer_toggle' customer.pk %}" style="display:inline;">
+                {% csrf_token %}
+                {% if customer.is_active %}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Disable this customer account?')">
+                        Disable Account
+                    </button>
+                {% else %}
+                    <button type="submit" class="btn btn-success" onclick="return confirm('Enable this customer account?')">
+                        Enable Account
+                    </button>
+                {% endif %}
+            </form>
+            <a href="{% url 'customers:staff_customer_list' %}" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+    
+    <div class="detail-sections">
+        <section class="detail-section">
+            <h2>Account Information</h2>
+            <dl class="detail-list">
+                <dt>Username:</dt>
+                <dd>{{ customer.username }}</dd>
+                
+                <dt>Email:</dt>
+                <dd>{{ customer.email }}</dd>
+                
+                <dt>Full Name:</dt>
+                <dd>{{ customer.get_full_name|default:"-" }}</dd>
+                
+                <dt>Status:</dt>
+                <dd>
+                    {% if customer.is_active %}
+                        <span class="badge badge-success">Active</span>
+                    {% else %}
+                        <span class="badge badge-danger">Disabled</span>
+                    {% endif %}
+                </dd>
+                
+                <dt>Joined:</dt>
+                <dd>{{ customer.date_joined|date:"F d, Y g:i A" }}</dd>
+                
+                <dt>Last Login:</dt>
+                <dd>{{ customer.last_login|date:"F d, Y g:i A"|default:"Never" }}</dd>
+            </dl>
+        </section>
+        
+        {% if customer.customer_profile %}
+            <section class="detail-section">
+                <h2>Profile Information</h2>
+                <dl class="detail-list">
+                    <dt>Age:</dt>
+                    <dd>{{ customer.customer_profile.age|default:"-" }}</dd>
+                    
+                    <dt>Gender:</dt>
+                    <dd>{{ customer.customer_profile.get_gender_display|default:"-" }}</dd>
+                    
+                    <dt>Employment Status:</dt>
+                    <dd>{{ customer.customer_profile.get_employment_status_display|default:"-" }}</dd>
+                    
+                    <dt>Occupation:</dt>
+                    <dd>{{ customer.customer_profile.get_occupation_display|default:"-" }}</dd>
+                    
+                    <dt>Education Level:</dt>
+                    <dd>{{ customer.customer_profile.get_education_level_display|default:"-" }}</dd>
+                    
+                    <dt>Household Size:</dt>
+                    <dd>{{ customer.customer_profile.household_size|default:"-" }}</dd>
+                    
+                    <dt>Has Children:</dt>
+                    <dd>{{ customer.customer_profile.has_children|yesno:"Yes,No,-" }}</dd>
+                    
+                    <dt>Monthly Income (SGD):</dt>
+                    <dd>${{ customer.customer_profile.monthly_income_sgd|floatformat:2|default:"-" }}</dd>
+                </dl>
+            </section>
+        {% else %}
+            <section class="detail-section">
+                <h2>Profile Information</h2>
+                <p class="empty-state">Customer has not completed their profile.</p>
+            </section>
+        {% endif %}
+        
+        <section class="detail-section">
+            <h2>Recent Orders</h2>
+            {% if orders %}
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Items</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td>{{ order.order_number }}</td>
+                                    <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                    <td>{{ order.get_status_display }}</td>
+                                    <td>${{ order.total_amount }}</td>
+                                    <td>{{ order.items.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p class="note">Showing 10 most recent orders.</p>
+            {% else %}
+                <p class="empty-state">No orders found for this customer.</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -9,6 +9,7 @@
     <div style="display:flex; gap:0.5rem;">
         <a class="button" href="{% url 'catalog:product_create' %}">Add Product</a>
         <a class="button" href="{% url 'catalog:catalog_upload' %}">Bulk Upload</a>
+        <a class="button" href="{% url 'catalog:product_export' %}">Export CSV</a>
         <a class="button" href="{% url 'catalog:category_management' %}">Categories</a>
         <a class="button" href="{% url 'catalog:low_stock_list' %}">Low Stock ({{ low_stock_count }})</a>
     </div>

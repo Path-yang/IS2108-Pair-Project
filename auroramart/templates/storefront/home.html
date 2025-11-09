@@ -8,12 +8,6 @@
         <div style="display:flex; gap:0.75rem; margin-top:1rem; align-items:center; flex-wrap:wrap;">
             <a class="button" href="{% url 'storefront:onboarding' %}">Personalise my experience</a>
             <a class="button" href="{% url 'storefront:product_list' %}" style="background:#6b7280;">Browse all products</a>
-
-            {% if onboarding_category %}
-                <button id="toggleRecommendations" class="button" style="background:#047857; margin-left:auto;">
-                    <span id="toggleText">{% if show_recommendations %}Show All Products{% else %}Show Recommendations{% endif %}</span>
-                </button>
-            {% endif %}
         </div>
     </div>
 </section>
@@ -94,34 +88,4 @@
         {% endfor %}
     </div>
 </section>
-
-{% if onboarding_category %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleBtn = document.getElementById('toggleRecommendations');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', function() {
-            fetch('{% url "storefront:toggle_recommendations" %}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Reload page to show new state
-                    window.location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error toggling recommendations:', error);
-            });
-        });
-    }
-});
-</script>
-{% endif %}
 {% endblock %}

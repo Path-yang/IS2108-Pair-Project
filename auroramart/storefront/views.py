@@ -127,6 +127,19 @@ class ProductListView(generic.ListView):
             .filter(is_active=True)
             .order_by("name")
         )
+
+        # Check if ML recommendations are enabled
+        show_recommendations = self.request.session.get('show_recommendations', False)
+        onboarding_category = self.request.session.get('onboarding_category')
+
+        # If recommendations enabled and category exists, filter by predicted category
+        if show_recommendations and onboarding_category:
+            predicted_category = ProductCategory.objects.filter(
+                name__iexact=onboarding_category
+            ).first()
+            if predicted_category:
+                queryset = queryset.filter(category=predicted_category)
+
         self.filter_form = ProductFilterForm(self.request.GET or None)
         if self.filter_form.is_valid():
             data = self.filter_form.cleaned_data
@@ -156,6 +169,11 @@ class ProductListView(generic.ListView):
         if highlight:
             highlight = highlight.replace("+", " ")
         ctx["highlight_category"] = highlight
+
+        # Pass toggle state and onboarding data to template
+        ctx["show_recommendations"] = self.request.session.get('show_recommendations', False)
+        ctx["onboarding_category"] = self.request.session.get('onboarding_category')
+
         return ctx
 
 

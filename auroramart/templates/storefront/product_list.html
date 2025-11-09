@@ -4,13 +4,22 @@
 <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
     <div>
         <h1>Shop the catalogue</h1>
-        {% if highlight_category %}
+        {% if show_recommendations and onboarding_category %}
+            <p>Showing recommendations for you: <strong>{{ onboarding_category }}</strong></p>
+        {% elif highlight_category %}
             <p>Recommended for you: <strong>{{ highlight_category }}</strong></p>
         {% else %}
             <p class="muted">Filter by category or search for a product.</p>
         {% endif %}
     </div>
-    <a class="button" href="{% url 'storefront:cart' %}">View cart</a>
+    <div style="display:flex; gap:0.75rem; align-items:center;">
+        {% if onboarding_category %}
+            <button id="toggleRecommendations" class="button" style="background:#047857;">
+                <span id="toggleText">{% if show_recommendations %}Show All Products{% else %}Show Recommendations{% endif %}</span>
+            </button>
+        {% endif %}
+        <a class="button" href="{% url 'storefront:cart' %}">View cart</a>
+    </div>
 </header>
 
 <form method="get" class="card form-grid" style="margin-bottom:1.5rem;">
@@ -42,5 +51,34 @@
             <a class="button" href="?page={{ page_obj.next_page_number }}">Next</a>
         {% endif %}
     </div>
+{% endif %}
+
+{% if onboarding_category %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('toggleRecommendations');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            fetch('{% url "storefront:toggle_recommendations" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling recommendations:', error);
+            });
+        });
+    }
+});
+</script>
 {% endif %}
 {% endblock %}

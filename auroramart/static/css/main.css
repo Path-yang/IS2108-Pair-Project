@@ -239,6 +239,15 @@ form select:focus {
     box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
 }
 
+/* Help text styling */
+.help-text {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
 /* Checkbox styling */
 input[type="checkbox"] {
     width: auto;

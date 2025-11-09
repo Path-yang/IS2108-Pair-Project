@@ -23,7 +23,6 @@
         <article class="card">
             <h3>{{ product.name }}</h3>
             <p class="muted">{{ product.category.name }}{% if product.subcategory %} › {{ product.subcategory.name }}{% endif %}</p>
-            <p>{{ product.description|truncatewords:20 }}</p>
             <p style="font-weight:700;">${{ product.unit_price }}</p>
             <p>{% if product.quantity_on_hand > 0 %}In stock{% else %}<span style="color:#b91c1c;">Out of stock</span>{% endif %}</p>
             <a class="button" href="{% url 'storefront:product_detail' product.sku %}">View details</a>

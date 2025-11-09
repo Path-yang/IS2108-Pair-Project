@@ -1,104 +1,144 @@
 {% extends "base.html" %}
 
-{% block title %}Customer Details - {{ customer.get_gender_display }}, {{ customer.age }} - AuroraMart Staff{% endblock %}
+{% block title %}Customer Profile - {{ customer.get_gender_display }}, {{ customer.age }} - AuroraMart Staff{% endblock %}
 
 {% block content %}
 <div class="staff-container">
-    <div class="page-header">
-        <h1>Customer Profile Details</h1>
-        <div class="actions">
+    <!-- Page Header -->
+    <div class="profile-header">
+        <div class="profile-header-content">
+            <div class="profile-avatar">
+                <span class="avatar-icon">👤</span>
+            </div>
+            <div class="profile-header-info">
+                <h1>Customer Profile</h1>
+                <p class="profile-subtitle">
+                    {{ customer.age }} years old · {{ customer.get_gender_display }} · {{ customer.occupation }}
+                </p>
+            </div>
+        </div>
+        <div class="profile-actions">
             {% if customer.user and not customer.user.is_staff %}
                 <form method="post" action="{% url 'customers:staff_customer_toggle' customer.pk %}" style="display:inline;">
                     {% csrf_token %}
                     {% if customer.user.is_active %}
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Disable this customer account?')">
-                            Disable Account
+                            🚫 Disable Account
                         </button>
                     {% else %}
-                        <button type="submit" class="btn btn-success" onclick="return confirm('Enable this customer account?')">
-                            Enable Account
+                        <button type="submit" class="btn-success" onclick="return confirm('Enable this customer account?')">
+                            ✅ Enable Account
                         </button>
                     {% endif %}
                 </form>
             {% endif %}
-            <a href="{% url 'customers:staff_customer_list' %}" class="btn btn-secondary">Back to List</a>
+            <a href="{% url 'customers:staff_customer_list' %}" class="btn btn-secondary">← Back to List</a>
         </div>
     </div>
     
-    <div class="detail-sections">
-        <section class="detail-section">
-            <h2>Demographic Information</h2>
-            <dl class="detail-list">
-                <dt>Age:</dt>
-                <dd>{{ customer.age }}</dd>
-                
-                <dt>Gender:</dt>
-                <dd>{{ customer.get_gender_display }}</dd>
-                
-                <dt>Employment Status:</dt>
-                <dd>{{ customer.get_employment_status_display }}</dd>
-                
-                <dt>Occupation:</dt>
-                <dd>{{ customer.occupation }}</dd>
-                
-                <dt>Education:</dt>
-                <dd>{{ customer.education }}</dd>
-                
-                <dt>Household Size:</dt>
-                <dd>{{ customer.household_size }}</dd>
-                
-                <dt>Has Children:</dt>
-                <dd>{{ customer.has_children|yesno:"Yes,No" }}</dd>
-                
-                <dt>Monthly Income (SGD):</dt>
-                <dd>${{ customer.monthly_income_sgd|floatformat:2 }}</dd>
-                
-                <dt>Preferred Category:</dt>
-                <dd>{{ customer.preferred_category_label|default:"-" }}</dd>
-                
-                <dt>Profile Created:</dt>
-                <dd>{{ customer.created_at|date:"F d, Y g:i A" }}</dd>
-            </dl>
-        </section>
+    <!-- Profile Grid -->
+    <div class="profile-grid">
+        <!-- Demographic Information Card -->
+        <div class="profile-card">
+            <div class="profile-card-header">
+                <h2>📊 Demographic Information</h2>
+            </div>
+            <div class="profile-card-body">
+                <div class="info-row">
+                    <span class="info-label">Age</span>
+                    <span class="info-value">{{ customer.age }} years</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Gender</span>
+                    <span class="info-value">{{ customer.get_gender_display }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Employment Status</span>
+                    <span class="info-value">{{ customer.get_employment_status_display }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Occupation</span>
+                    <span class="info-value">{{ customer.occupation }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Education</span>
+                    <span class="info-value">{{ customer.education }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Household Size</span>
+                    <span class="info-value">{{ customer.household_size }} people</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Has Children</span>
+                    <span class="info-value">{{ customer.has_children|yesno:"Yes,No" }}</span>
+                </div>
+                <div class="info-row highlight">
+                    <span class="info-label">Monthly Income</span>
+                    <span class="info-value">${{ customer.monthly_income_sgd|floatformat:2 }} SGD</span>
+                </div>
+                <div class="info-row highlight">
+                    <span class="info-label">Preferred Category</span>
+                    <span class="info-value badge-primary">{{ customer.preferred_category_label|default:"Not Set" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Profile Created</span>
+                    <span class="info-value">{{ customer.created_at|date:"F d, Y g:i A" }}</span>
+                </div>
+            </div>
+        </div>
         
-        {% if customer.user %}
-            <section class="detail-section">
-                <h2>Account Information</h2>
-                <dl class="detail-list">
-                    <dt>Username:</dt>
-                    <dd>{{ customer.user.username }}</dd>
-                    
-                    <dt>Email:</dt>
-                    <dd>{{ customer.user.email }}</dd>
-                    
-                    <dt>Full Name:</dt>
-                    <dd>{{ customer.user.get_full_name|default:"-" }}</dd>
-                    
-                    <dt>Status:</dt>
-                    <dd>
-                        {% if customer.user.is_active %}
-                            <span class="badge badge-success">Active</span>
-                        {% else %}
-                            <span class="badge badge-danger">Disabled</span>
-                        {% endif %}
-                    </dd>
-                    
-                    <dt>Joined:</dt>
-                    <dd>{{ customer.user.date_joined|date:"F d, Y g:i A" }}</dd>
-                    
-                    <dt>Last Login:</dt>
-                    <dd>{{ customer.user.last_login|date:"F d, Y g:i A"|default:"Never" }}</dd>
-                </dl>
-            </section>
-        {% else %}
-            <section class="detail-section">
-                <h2>Account Information</h2>
-                <p class="empty-state">This customer profile does not have a linked user account.</p>
-            </section>
-        {% endif %}
-        
-        <section class="detail-section">
-            <h2>Recent Orders</h2>
+        <!-- Account Information Card -->
+        <div class="profile-card">
+            <div class="profile-card-header">
+                <h2>🔐 Account Information</h2>
+            </div>
+            <div class="profile-card-body">
+                {% if customer.user %}
+                    <div class="info-row">
+                        <span class="info-label">Username</span>
+                        <span class="info-value">{{ customer.user.username }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">{{ customer.user.email }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Full Name</span>
+                        <span class="info-value">{{ customer.user.get_full_name|default:"-" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Account Status</span>
+                        <span class="info-value">
+                            {% if customer.user.is_active %}
+                                <span class="badge badge-success">✓ Active</span>
+                            {% else %}
+                                <span class="badge badge-danger">✗ Disabled</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Member Since</span>
+                        <span class="info-value">{{ customer.user.date_joined|date:"F d, Y" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Last Login</span>
+                        <span class="info-value">{{ customer.user.last_login|date:"F d, Y g:i A"|default:"Never logged in" }}</span>
+                    </div>
+                {% else %}
+                    <div class="empty-state-small">
+                        <p>🔓 This customer profile does not have a linked user account.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Orders Section -->
+    <div class="profile-card full-width">
+        <div class="profile-card-header">
+            <h2>📦 Recent Orders</h2>
+        </div>
+        <div class="profile-card-body">
             {% if orders %}
                 <div class="table-container">
                     <table class="data-table">
@@ -114,21 +154,23 @@
                         <tbody>
                             {% for order in orders %}
                                 <tr>
-                                    <td>{{ order.order_number }}</td>
+                                    <td><strong>{{ order.order_number }}</strong></td>
                                     <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                    <td>{{ order.get_status_display }}</td>
-                                    <td>${{ order.total_amount }}</td>
-                                    <td>{{ order.items.count }}</td>
+                                    <td><span class="badge badge-primary">{{ order.get_status_display }}</span></td>
+                                    <td><strong>${{ order.total_amount }}</strong></td>
+                                    <td>{{ order.items.count }} items</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                <p class="note">Showing 10 most recent orders.</p>
+                <p class="table-note">Showing 10 most recent orders</p>
             {% else %}
-                <p class="empty-state">No orders found for this customer.</p>
+                <div class="empty-state-small">
+                    <p>📭 No orders found for this customer.</p>
+                </div>
             {% endif %}
-        </section>
+        </div>
     </div>
 </div>
 {% endblock %}

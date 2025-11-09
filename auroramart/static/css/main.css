@@ -1,4 +1,4 @@
-/* AuroraMart Main Stylesheet - Updated November 9, 2025 v6 */
+/* AuroraMart Main Stylesheet - Updated November 9, 2025 v7 */
 
 body {
     margin: 0;
@@ -819,4 +819,245 @@ a.button:hover {
 
 .card p.muted {
     font-size: 0.9375rem;
+}
+
+/* Customer Profile Page Styling */
+.profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.profile-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    backdrop-filter: blur(10px);
+}
+
+.avatar-icon {
+    font-size: 3rem;
+}
+
+.profile-header-info h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.profile-subtitle {
+    margin: 0.5rem 0 0;
+    font-size: 1rem;
+    opacity: 0.95;
+    font-weight: 500;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.profile-actions .btn,
+.profile-actions button {
+    background: rgba(255, 255, 255, 0.95);
+    color: #667eea;
+    border: none;
+}
+
+.profile-actions .btn:hover,
+.profile-actions button:hover {
+    background: white;
+    transform: translateY(-2px);
+}
+
+.profile-actions .btn-danger {
+    background: #dc2626;
+    color: white;
+}
+
+.profile-actions .btn-danger:hover {
+    background: #b91c1c;
+}
+
+.profile-actions .btn-success,
+.profile-actions .btn-success {
+    background: #059669;
+    color: white;
+}
+
+.profile-actions .btn-success:hover {
+    background: #047857;
+}
+
+/* Profile Grid Layout */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.profile-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.profile-card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.profile-card-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1a2230;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-card-body {
+    padding: 1.5rem;
+}
+
+/* Info Rows */
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f3f4f6;
+    gap: 1rem;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row.highlight {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+    padding: 1rem;
+    margin: 0 -0.5rem;
+    border-radius: 8px;
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.9375rem;
+}
+
+.info-value {
+    font-weight: 500;
+    color: #1a2230;
+    font-size: 1rem;
+    text-align: right;
+}
+
+.info-value strong {
+    color: #667eea;
+}
+
+/* Badge Enhancements */
+.badge-primary {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Empty State Small */
+.empty-state-small {
+    text-align: center;
+    padding: 2rem;
+    color: #9ca3af;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 2px dashed #e5e7eb;
+}
+
+.empty-state-small p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Table Note */
+.table-note {
+    margin: 1rem 0 0;
+    padding: 0.75rem 1rem;
+    background: #f9fafb;
+    border-left: 3px solid #667eea;
+    color: #6b7280;
+    font-size: 0.875rem;
+    border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-header-info h1 {
+        font-size: 1.5rem;
+    }
+    
+    .profile-actions {
+        flex-direction: column;
+    }
+    
+    .profile-actions .btn,
+    .profile-actions button {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .info-value {
+        text-align: left;
+    }
 }

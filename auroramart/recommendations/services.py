@@ -63,6 +63,9 @@ def predict_preferred_category(onboarding_data: dict) -> Optional[str]:
             value = onboarding_data.get(feature)
             if feature == "has_children":
                 value = int(bool(value))
+            elif feature == "monthly_income_sgd":
+                # Convert Decimal to float for sklearn compatibility
+                value = float(value) if value is not None else 0.0
             feature_row.append(value)
         prediction = model.predict([feature_row])[0]
         return prediction

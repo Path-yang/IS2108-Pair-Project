@@ -22,7 +22,16 @@ class OnboardingForm(forms.Form):
             ("Retired", "Retired"),
         ]
     )
-    occupation = forms.CharField(max_length=64)
+    occupation = forms.ChoiceField(
+        choices=[
+            ("Sales", "Sales"),
+            ("Service", "Service"),
+            ("Admin", "Admin"),
+            ("Tech", "Tech"),
+            ("Education", "Education"),
+            ("Skilled Trades", "Skilled Trades"),
+        ]
+    )
     education = forms.ChoiceField(
         choices=[
             ("Secondary", "Secondary"),

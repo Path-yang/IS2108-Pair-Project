@@ -505,7 +505,7 @@ header {
 
 .btn-primary {
     background: #1a73e8;
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 .btn-primary:hover {

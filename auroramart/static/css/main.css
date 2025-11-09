@@ -1,4 +1,4 @@
-/* AuroraMart Main Stylesheet - Updated November 9, 2025 v4 */
+/* AuroraMart Main Stylesheet - Updated November 9, 2025 v6 */
 
 body {
     margin: 0;
@@ -281,6 +281,7 @@ th, td {
 th {
     background: #f8fafc;
     font-weight: 600;
+    color: #374151;
 }
 
 .muted {
@@ -601,4 +602,215 @@ header {
 .data-table {
     width: 100%;
     min-width: 800px;
+}
+
+/* Low Stock Alerts Page Styling */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    margin: 0;
+    color: #1a2230;
+    font-weight: 700;
+}
+
+.page-header .muted {
+    display: block;
+    margin-top: 0.5rem;
+}
+
+/* Enhanced table styling */
+.data-table,
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+}
+
+.data-table thead tr,
+table thead tr {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.data-table thead th,
+table thead th {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff !important;
+    background: transparent !important;
+    border-bottom: none;
+}
+
+.data-table th:first-child,
+table thead th:first-child {
+    border-top-left-radius: 8px;
+}
+
+.data-table th:last-child,
+table thead th:last-child {
+    border-top-right-radius: 8px;
+}
+
+.data-table tbody tr,
+table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.data-table tbody tr:hover,
+table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.data-table td,
+table tbody td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+    font-size: 0.9375rem;
+}
+
+.data-table tbody tr:last-child td,
+table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Stock level indicators */
+.stock-critical {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.stock-low {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.stock-warning {
+    color: #eab308;
+    font-weight: 600;
+}
+
+/* Action links in tables */
+.data-table a,
+table tbody a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.data-table a:hover,
+table tbody a:hover {
+    color: #1557b0;
+    text-decoration: underline;
+}
+
+/* Back button styling */
+.btn-back,
+a.button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background: #1a73e8;
+    color: #ffffff;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-back:hover,
+a.button:hover {
+    background: #1557b0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+
+/* Empty state styling */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6b7280;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+/* Responsive table improvements */
+@media (max-width: 1024px) {
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .data-table,
+    table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Status badges */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+/* Card improvements for consistent look */
+.card h1,
+.card h2,
+.card h3 {
+    color: #1a2230;
+}
+
+.card p.muted {
+    font-size: 0.9375rem;
 }

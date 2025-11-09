@@ -96,6 +96,15 @@ a {
     overflow: hidden;
 }
 
+.card-grid .card {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-grid .card .button {
+    margin-top: auto;
+}
+
 .card * {
     max-width: 100%;
 }

@@ -1,8 +1,14 @@
+/* AuroraMart Main Stylesheet - Updated November 9, 2025 */
+
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background-color: #f6f7fb;
     color: #1a2230;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 a {
@@ -87,6 +93,11 @@ a {
     border-radius: 10px;
     padding: 1.25rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.card * {
+    max-width: 100%;
 }
 
 .form-grid {
@@ -104,10 +115,13 @@ a {
 .form-grid textarea,
 .form-grid select {
     width: 100%;
+    max-width: 100%;
     padding: 0.65rem 0.75rem;
     border: 1px solid #d1d5db;
     border-radius: 6px;
     background-color: #ffffff;
+    box-sizing: border-box;
+    font-size: 1rem;
 }
 
 button,
@@ -120,12 +134,65 @@ button,
     color: #ffffff;
     border: none;
     font-weight: 600;
+    box-sizing: border-box;
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+/* Django form fields styling */
+form p {
+    margin: 0 0 1rem;
+}
+
+form label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.35rem;
+}
+
+form input[type="text"],
+form input[type="password"],
+form input[type="email"],
+form input[type="number"],
+form input[type="date"],
+form textarea,
+form select {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+form input:focus,
+form textarea:focus,
+form select:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     background: #ffffff;
+    table-layout: auto;
+}
+
+.card table {
+    overflow-x: auto;
+    display: block;
+}
+
+.card table thead,
+.card table tbody,
+.card table tr {
+    display: table;
+    width: 100%;
+    table-layout: auto;
 }
 
 th, td {
@@ -142,4 +209,44 @@ th {
 .muted {
     color: #6b7280;
     margin: 0.35rem 0 0;
+}
+
+/* Search and filter inputs */
+input[type="search"],
+input[type="text"] {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+/* Flexible button groups */
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Responsive header with buttons */
+header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .button-group {
+        justify-content: stretch;
+    }
+    
+    .button {
+        flex: 1;
+        text-align: center;
+    }
 }

@@ -48,7 +48,8 @@
                                     {% endif %}
                                     <br><small class="muted">@{{ customer.user.username }}</small>
                                 {% else %}
-                                    <span class="muted">No account</span>
+                                    <strong>Customer #{{ customer.pk }}</strong>
+                                    <br><small class="muted">👤 Profile only</small>
                                 {% endif %}
                             </td>
                             <td>{{ customer.age }}</td>

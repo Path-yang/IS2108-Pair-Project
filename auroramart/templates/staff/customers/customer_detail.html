@@ -19,13 +19,15 @@
                             {{ customer.user.username }}
                         {% endif %}
                     {% else %}
-                        Customer Profile
+                        Customer #{{ customer.pk }}
                     {% endif %}
                 </h1>
                 <p class="profile-subtitle">
                     {{ customer.age }} years old · {{ customer.get_gender_display }} · {{ customer.occupation }}
                     {% if customer.user %}
                         <br><small>@{{ customer.user.username }}</small>
+                    {% else %}
+                        <br><small>👤 Profile only (no linked account)</small>
                     {% endif %}
                 </p>
             </div>

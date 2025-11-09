@@ -8,6 +8,7 @@ app_name = "storefront"
 urlpatterns = [
     path("", views.HomeView.as_view(), name="home"),
     path("onboarding/", views.OnboardingView.as_view(), name="onboarding"),
+    path("toggle-recommendations/", views.toggle_recommendations, name="toggle_recommendations"),
     path("products/", views.ProductListView.as_view(), name="product_list"),
     path("products/<str:sku>/", views.ProductDetailView.as_view(), name="product_detail"),
     path("cart/", views.CartView.as_view(), name="cart"),

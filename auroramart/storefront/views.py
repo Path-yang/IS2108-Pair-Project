@@ -1,8 +1,10 @@
 from django.contrib import messages
 from django.db.models import Count, Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View, generic
+from django.views.decorators.http import require_POST
 
 from catalog.models import Product, ProductCategory
 from orders import services as order_services
@@ -26,17 +28,64 @@ class HomeView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+
+        # Check if ML recommendations are enabled
+        show_recommendations = self.request.session.get('show_recommendations', False)
+        ctx["show_recommendations"] = show_recommendations
+
+        # Get onboarding data from session
+        onboarding_category = self.request.session.get('onboarding_category')
+        ctx["onboarding_category"] = onboarding_category
+
+        # Always show featured categories
         ctx["featured_categories"] = ProductCategory.objects.annotate(
             product_count=Count("products")
         ).order_by("-product_count")[:6]
-        ctx["trending_products"] = (
-            Product.objects.filter(is_active=True)
-            .order_by("-product_rating", "-quantity_on_hand")[:8]
-        )
+
+        if show_recommendations and onboarding_category:
+            # Show personalized recommendations based on predicted category
+            predicted_category = ProductCategory.objects.filter(
+                name__iexact=onboarding_category
+            ).first()
+
+            if predicted_category:
+                ctx["predicted_category"] = predicted_category
+                ctx["recommended_products"] = (
+                    Product.objects.filter(is_active=True, category=predicted_category)
+                    .order_by("-product_rating", "-quantity_on_hand")[:8]
+                )
+            else:
+                # Fallback to trending if category not found
+                ctx["recommended_products"] = (
+                    Product.objects.filter(is_active=True)
+                    .order_by("-product_rating", "-quantity_on_hand")[:8]
+                )
+        else:
+            # Show generic trending products
+            ctx["trending_products"] = (
+                Product.objects.filter(is_active=True)
+                .order_by("-product_rating", "-quantity_on_hand")[:8]
+            )
+
+        # Always show new arrivals
         ctx["new_arrivals"] = (
             Product.objects.filter(is_active=True).order_by("-created_at")[:6]
         )
         return ctx
+
+
+@require_POST
+def toggle_recommendations(request):
+    """Toggle ML recommendation mode on/off."""
+    current_state = request.session.get('show_recommendations', False)
+    new_state = not current_state
+    request.session['show_recommendations'] = new_state
+
+    return JsonResponse({
+        'success': True,
+        'show_recommendations': new_state,
+        'message': 'Recommendations enabled' if new_state else 'Showing all products'
+    })
 
 
 class OnboardingView(generic.FormView):

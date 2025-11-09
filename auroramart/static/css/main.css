@@ -285,7 +285,7 @@ th {
 }
 
 .muted {
-    color: #6b7280;
+    color: #9ca3af;
     margin: 0.35rem 0 0;
 }
 
@@ -518,6 +518,11 @@ header {
 
 .btn-secondary:hover {
     background: #e5e7eb;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
 }
 
 /* Top categories list styling */

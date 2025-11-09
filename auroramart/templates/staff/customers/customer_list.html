@@ -26,33 +26,37 @@
             <table class="data-table">
                 <thead>
                     <tr>
+                        <th>Name</th>
                         <th>Age</th>
                         <th>Gender</th>
                         <th>Occupation</th>
                         <th>Employment</th>
                         <th>Income (SGD)</th>
                         <th>Preferred Category</th>
-                        <th>Has Account</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for customer in customers %}
                         <tr>
+                            <td>
+                                {% if customer.user %}
+                                    {% if customer.user.first_name or customer.user.last_name %}
+                                        <strong>{{ customer.user.first_name }} {{ customer.user.last_name }}</strong>
+                                    {% else %}
+                                        <strong>{{ customer.user.username }}</strong>
+                                    {% endif %}
+                                    <br><small class="muted">@{{ customer.user.username }}</small>
+                                {% else %}
+                                    <span class="muted">No account</span>
+                                {% endif %}
+                            </td>
                             <td>{{ customer.age }}</td>
                             <td>{{ customer.get_gender_display }}</td>
                             <td>{{ customer.occupation }}</td>
                             <td>{{ customer.get_employment_status_display }}</td>
                             <td>${{ customer.monthly_income_sgd|floatformat:2 }}</td>
                             <td>{{ customer.preferred_category_label|default:"-" }}</td>
-                            <td>
-                                {% if customer.user %}
-                                    <span class="badge badge-success">Yes</span>
-                                    <small>({{ customer.user.username }})</small>
-                                {% else %}
-                                    <span class="badge badge-secondary">No</span>
-                                {% endif %}
-                            </td>
                             <td>
                                 <a href="{% url 'customers:staff_customer_detail' customer.pk %}" class="btn btn-sm btn-primary">View</a>
                             </td>

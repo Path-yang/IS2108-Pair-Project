@@ -11,9 +11,22 @@
                 <span class="avatar-icon">👤</span>
             </div>
             <div class="profile-header-info">
-                <h1>Customer Profile</h1>
+                <h1>
+                    {% if customer.user %}
+                        {% if customer.user.first_name or customer.user.last_name %}
+                            {{ customer.user.first_name }} {{ customer.user.last_name }}
+                        {% else %}
+                            {{ customer.user.username }}
+                        {% endif %}
+                    {% else %}
+                        Customer Profile
+                    {% endif %}
+                </h1>
                 <p class="profile-subtitle">
                     {{ customer.age }} years old · {{ customer.get_gender_display }} · {{ customer.occupation }}
+                    {% if customer.user %}
+                        <br><small>@{{ customer.user.username }}</small>
+                    {% endif %}
                 </p>
             </div>
         </div>

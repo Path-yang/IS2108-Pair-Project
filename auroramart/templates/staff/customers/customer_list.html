@@ -4,8 +4,13 @@
 
 {% block content %}
 <div class="staff-container">
-    <h1>Customer Management</h1>
-    
+    <div class="page-header">
+        <div>
+            <h1>Customer Management</h1>
+            <p class="muted">View and manage customer profiles and account status.</p>
+        </div>
+    </div>
+
     <div class="toolbar">
         <form method="get" class="search-form">
             <input type="text" name="q" placeholder="Search by gender, occupation, category..." value="{{ search_query }}">

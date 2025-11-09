@@ -425,7 +425,7 @@ header {
 
 .staff-container h1 {
     font-size: 2rem;
-    margin: 0 0 2rem;
+    margin: 0;
     color: #1a2230;
     font-weight: 700;
 }
@@ -523,6 +523,7 @@ header {
 .btn-sm {
     padding: 0.4rem 0.8rem;
     font-size: 0.875rem;
+    border: none;
 }
 
 /* Top categories list styling */

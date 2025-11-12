@@ -47,9 +47,9 @@
         
         <section class="profile-section">
             <h2>Personal Information</h2>
-            <p class="help-text">Help us personalize your shopping experience!</p>
-            
-                <div class="form-row">
+            <p class="muted" style="margin-bottom: 1.5rem;">Help us personalize your shopping experience!</p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         {{ profile_form.age.label_tag }}
                         {{ profile_form.age }}
@@ -57,7 +57,7 @@
                             <span class="field-error">{{ profile_form.age.errors.0 }}</span>
                         {% endif %}
                     </div>
-                    
+
                     <div class="form-group">
                         {{ profile_form.gender.label_tag }}
                         {{ profile_form.gender }}
@@ -66,8 +66,8 @@
                         {% endif %}
                     </div>
                 </div>
-                
-                <div class="form-row">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         {{ profile_form.employment_status.label_tag }}
                         {{ profile_form.employment_status }}
@@ -75,7 +75,7 @@
                             <span class="field-error">{{ profile_form.employment_status.errors.0 }}</span>
                         {% endif %}
                     </div>
-                    
+
                     <div class="form-group">
                         {{ profile_form.occupation.label_tag }}
                         {{ profile_form.occupation }}
@@ -84,8 +84,8 @@
                         {% endif %}
                     </div>
                 </div>
-                
-                <div class="form-row">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         {{ profile_form.education_level.label_tag }}
                         {{ profile_form.education_level }}
@@ -93,7 +93,7 @@
                             <span class="field-error">{{ profile_form.education_level.errors.0 }}</span>
                         {% endif %}
                     </div>
-                    
+
                     <div class="form-group">
                         {{ profile_form.household_size.label_tag }}
                         {{ profile_form.household_size }}
@@ -102,16 +102,17 @@
                         {% endif %}
                     </div>
                 </div>
-                
-                <div class="form-row">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        {{ profile_form.has_children.label_tag }}
-                        {{ profile_form.has_children }}
+                        <label for="{{ profile_form.has_children.id_for_label }}">
+                            {{ profile_form.has_children }} {{ profile_form.has_children.label }}
+                        </label>
                         {% if profile_form.has_children.errors %}
                             <span class="field-error">{{ profile_form.has_children.errors.0 }}</span>
                         {% endif %}
                     </div>
-                    
+
                     <div class="form-group">
                         {{ profile_form.monthly_income_sgd.label_tag }}
                         {{ profile_form.monthly_income_sgd }}

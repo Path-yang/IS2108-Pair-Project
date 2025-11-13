@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.contrib.auth.models import User
 
 from .models import CustomerProfile
@@ -51,6 +51,23 @@ class CustomerProfileForm(forms.ModelForm):
 class UserProfileUpdateForm(forms.ModelForm):
     """Form for updating user account information."""
     
+    shipping_address = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Enter your full shipping address'}),
+        required=False,
+        help_text="Your default shipping address for orders"
+    )
+    phone_number = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': '+65 1234 5678'}),
+        help_text="Contact number for delivery"
+    )
+    
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email"]
+        widgets = {
+            'email': forms.EmailInput(attrs={'placeholder': 'your.email@example.com'}),
+            'first_name': forms.TextInput(attrs={'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Last Name'}),
+        }

@@ -10,9 +10,9 @@
 <body>
     <header class="site-header">
         <div class="wrapper">
-            <a href="{% url 'storefront:home' %}" class="logo-link">
-                <img src="{% static 'images/auroramart-logo.png' %}" alt="AuroraMart" class="logo-icon">
-                <span class="logo-text">AuroraMart</span>
+            <a href="{% url 'storefront:home' %}" class="logo" style="display:flex;align-items:center;gap:0.75rem;text-decoration:none;">
+                <img src="{% static 'images/auroramart-logo.png' %}" alt="AuroraMart Logo" style="height:45px;width:auto;object-fit:contain;max-width:200px;">
+                <span style="font-size:1.5rem;font-weight:600;line-height:1;">AuroraMart</span>
             </a>
             <nav>
                 <a href="{% url 'storefront:product_list' %}">Shop</a>

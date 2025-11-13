@@ -89,15 +89,25 @@ def _heuristic_category_prediction(onboarding_data: dict) -> Optional[str]:
 
 
 def recommend_associated_products(
-    basket_skus: Iterable[str], limit: int = 4
+    basket_skus: Iterable[str], limit: int = 4, context_products: Optional[List[Product]] = None
 ) -> List[Product]:
-    """Return a list of product recommendations based on association rules."""
+    """Return a list of product recommendations based on association rules.
+    
+    Args:
+        basket_skus: List of SKUs to find recommendations for
+        limit: Maximum number of recommendations to return
+        context_products: Optional list of Product objects for context-aware fallback
+    """
 
     basket_skus = list({sku for sku in basket_skus if sku})
+    if not basket_skus:
+        logger.info("No SKUs provided, using context-aware fallback")
+        return _fallback_association_recommendations(basket_skus, limit, context_products)
+    
     rules = get_association_rules()
     if rules is None:
-        logger.info("Association rules not loaded, using fallback")
-        return _fallback_association_recommendations(basket_skus, limit)
+        logger.info("Association rules not loaded, using context-aware fallback")
+        return _fallback_association_recommendations(basket_skus, limit, context_products)
 
     # Query the DataFrame for rules where basket items are in antecedents
     # Process ALL input SKUs to ensure variety in recommendations
@@ -105,7 +115,12 @@ def recommend_associated_products(
     matched_count = 0
     for sku in basket_skus:
         # Find rules where this SKU is in the antecedents
-        matched_rules = rules[rules['antecedents'].apply(lambda x: sku in x)]
+        # Antecedents are frozensets, so we check membership
+        try:
+            matched_rules = rules[rules['antecedents'].apply(lambda x: sku in x if x else False)]
+        except Exception as e:
+            logger.warning(f"Error matching rules for SKU {sku}: {e}")
+            continue
 
         if not matched_rules.empty:
             matched_count += 1
@@ -113,36 +128,78 @@ def recommend_associated_products(
             top_rules = matched_rules.sort_values(by='confidence', ascending=False).head(5)
 
             for _, row in top_rules.iterrows():
-                # Add all items from consequents
-                suggestions.extend(list(row['consequents']))
+                # Consequents are also frozensets, convert to list
+                try:
+                    consequents = list(row['consequents']) if row['consequents'] else []
+                    suggestions.extend(consequents)
+                except Exception as e:
+                    logger.warning(f"Error extracting consequents: {e}")
+                    continue
 
     logger.info(f"Processed {len(basket_skus)} SKUs, {matched_count} had rules, {len(suggestions)} suggestions before dedup")
 
     # Remove duplicates and items already in basket, preserving order
     unique_skus = []
+    seen = set()
     for sku in suggestions:
-        if sku not in basket_skus and sku not in unique_skus:
+        if sku and sku not in basket_skus and sku not in seen:
             unique_skus.append(sku)
-        if len(unique_skus) == limit:
+            seen.add(sku)
+        if len(unique_skus) >= limit * 2:  # Get more to account for missing products
             break
 
     # Fetch products from database
     products = list(Product.objects.filter(sku__in=unique_skus, is_active=True))
 
-    # If we didn't find enough products, supplement with fallback recommendations
+    # If we didn't find enough products from association rules, supplement with context-aware fallback
     if len(products) < limit:
-        products.extend(
-            _fallback_association_recommendations(basket_skus, limit - len(products))
-        )
+        needed = limit - len(products)
+        fallback_products = _fallback_association_recommendations(basket_skus, needed, context_products)
+        # Avoid duplicates
+        existing_skus = {p.sku for p in products}
+        for p in fallback_products:
+            if p.sku not in existing_skus:
+                products.append(p)
+                if len(products) >= limit:
+                    break
+    
     return products[:limit]
 
 
 def _fallback_association_recommendations(
-    basket_skus: Iterable[str], limit: int
+    basket_skus: Iterable[str], limit: int, context_products: Optional[List[Product]] = None
 ) -> List[Product]:
-    """Fallback to top-rated products not already in the basket."""
+    """Fallback to context-aware recommendations when association rules unavailable.
+    
+    If context_products provided, recommends products from same categories.
+    Otherwise, returns diverse top-rated products.
+    """
+    queryset = Product.objects.exclude(sku__in=basket_skus).filter(is_active=True)
+    
+    # If we have context products, try to recommend from same categories
+    if context_products:
+        categories = {p.category for p in context_products if p.category}
+        if categories:
+            # Get products from same categories, ordered by rating
+            queryset = queryset.filter(category__in=categories).order_by(
+                "-product_rating", "-quantity_on_hand", "-created_at"
+            )
+            products = list(queryset[:limit])
+            if len(products) >= limit:
+                return products
+            # If not enough, supplement with other categories
+            needed = limit - len(products)
+            other_products = list(
+                Product.objects.exclude(sku__in=basket_skus + [p.sku for p in products])
+                .exclude(category__in=categories)
+                .filter(is_active=True)
+                .order_by("-product_rating", "-quantity_on_hand", "-created_at")[:needed]
+            )
+            products.extend(other_products)
+            return products[:limit]
+    
+    # No context - return diverse top-rated products
+    # Add some randomization by also considering recently added products
     return list(
-        Product.objects.exclude(sku__in=basket_skus)
-        .filter(is_active=True)
-        .order_by("-product_rating", "-quantity_on_hand")[:limit]
+        queryset.order_by("-product_rating", "-quantity_on_hand", "-created_at")[:limit]
     )

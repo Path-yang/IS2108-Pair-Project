@@ -218,8 +218,8 @@ class ProductListView(generic.ListView):
             # Strategy for "nudge exploration": Show products from OTHER categories
             if current_category:
                 # User is viewing a specific category - show products from OTHER categories
-                # Get association rule recommendations
-                next_best = recommend_associated_products(sample_skus, limit=6)
+                # Get association rule recommendations (no context needed, we filter by category anyway)
+                next_best = recommend_associated_products(sample_skus, limit=6, context_products=page_products[:5])
                 
                 # Filter to show products from OTHER categories (to encourage exploration)
                 next_best = [p for p in next_best if p.category != current_category]
@@ -240,7 +240,7 @@ class ProductListView(generic.ListView):
                 next_best = next_best[:4]
             else:
                 # No specific category but filters applied (e.g., search query) - use association rules
-                next_best = recommend_associated_products(sample_skus, limit=4)
+                next_best = recommend_associated_products(sample_skus, limit=4, context_products=page_products[:5])
             
             # If ML recommendations are ON, we can still respect it but prioritize exploration
             if show_recommendations and self.request.session.get('onboarding_category'):
@@ -297,7 +297,7 @@ class ProductDetailView(View):
         )
         form = AddToCartForm()
         form.fields["quantity"].widget.attrs["max"] = max(product.quantity_on_hand, 1)
-        recommendations = recommend_associated_products([product.sku], limit=4)
+        recommendations = recommend_associated_products([product.sku], limit=4, context_products=[product])
         
         # Get reviews for this product
         reviews = Review.objects.filter(product=product).select_related("user").order_by("-created_at")
@@ -340,7 +340,7 @@ class ProductDetailView(View):
                 order_services.add_product_to_basket(basket, product, quantity)
                 messages.success(request, f"{product.name} added to your cart.")
                 return redirect("storefront:cart")
-        recommendations = recommend_associated_products([product.sku], limit=4)
+        recommendations = recommend_associated_products([product.sku], limit=4, context_products=[product])
         return render(
             request,
             self.template_name,
@@ -354,8 +354,9 @@ class CartView(View):
     def get(self, request):
         basket = order_services.get_or_create_session_basket(request)
         items = basket.items.select_related("product")
+        item_products = [item.product for item in items]
         recommendations = recommend_associated_products(
-            [item.product.sku for item in items], limit=4
+            [item.product.sku for item in items], limit=4, context_products=item_products
         )
         update_form = UpdateCartForm()
         return render(

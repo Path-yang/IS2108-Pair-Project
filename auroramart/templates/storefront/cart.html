@@ -12,7 +12,7 @@
 </header>
 
 {% if items %}
-    <section class="card">
+    <section class="card" style="padding:0; overflow:hidden;">
         <table class="cart-table" style="width:100%; border-collapse:collapse; table-layout:fixed;">
             <colgroup>
                 <col style="width:40%;">
@@ -22,12 +22,12 @@
                 <col style="width:16%;">
             </colgroup>
             <thead>
-                <tr style="background-color:#6b21a8; color:white;">
-                    <th style="padding:0.75rem; text-align:left;">Product</th>
-                    <th style="padding:0.75rem; text-align:right;">Price</th>
-                    <th style="padding:0.75rem; text-align:center;">Quantity</th>
-                    <th style="padding:0.75rem; text-align:right;">Subtotal</th>
-                    <th style="padding:0.75rem; text-align:center;">Actions</th>
+                <tr style="background-color:#6b21a8; color:white; margin:0; padding:0;">
+                    <th style="padding:0.75rem; text-align:left !important; vertical-align:middle;">Product</th>
+                    <th style="padding:0.75rem; text-align:center !important; vertical-align:middle;">Price</th>
+                    <th style="padding:0.75rem; text-align:center !important; vertical-align:middle;">Quantity</th>
+                    <th style="padding:0.75rem; text-align:right !important; vertical-align:middle;">Subtotal</th>
+                    <th style="padding:0.75rem; text-align:center !important; vertical-align:middle;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,7 +37,7 @@
                             <strong>{{ item.product.name }}</strong>
                             <p class="muted" style="margin:0.25rem 0 0 0; font-size:0.875rem;">{{ item.product.sku }}</p>
                         </td>
-                        <td style="padding:0.75rem; text-align:right;">${{ item.unit_price|floatformat:2 }}</td>
+                        <td style="padding:0.75rem; text-align:center !important; vertical-align:middle;">${{ item.unit_price|floatformat:2 }}</td>
                         <td style="padding:0.75rem; text-align:center;">
                             <form method="post" style="display:flex; gap:0.5rem; align-items:center; justify-content:center; margin:0;">
                                 {% csrf_token %}
@@ -62,7 +62,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        <div style="margin-top:1.5rem; padding-top:1rem; border-top:2px solid #e5e7eb; text-align:right;">
+        <div style="padding:1.5rem; padding-top:1rem; border-top:2px solid #e5e7eb; text-align:right;">
             <p style="margin:0.5rem 0;"><strong>Total items:</strong> {{ basket.total_items }}</p>
             <p style="margin:0.5rem 0; font-size:1.25rem;"><strong>Subtotal:</strong> ${{ basket.subtotal|floatformat:2 }}</p>
         </div>

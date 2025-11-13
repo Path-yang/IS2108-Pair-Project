@@ -1,6 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Your Cart · AuroraMart{% endblock %}
 {% block content %}
+<style>
+    /* Override global table styles for cart table alignment */
+    .cart-table th,
+    .cart-table td {
+        text-align: inherit !important;
+    }
+    .cart-table th:nth-child(1),
+    .cart-table td:nth-child(1) {
+        text-align: left !important;
+    }
+    .cart-table th:nth-child(2),
+    .cart-table td:nth-child(2) {
+        text-align: center !important;
+    }
+    .cart-table th:nth-child(3),
+    .cart-table td:nth-child(3) {
+        text-align: center !important;
+    }
+    .cart-table th:nth-child(4),
+    .cart-table td:nth-child(4) {
+        text-align: right !important;
+    }
+    .cart-table th:nth-child(5),
+    .cart-table td:nth-child(5) {
+        text-align: center !important;
+    }
+</style>
 <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
     <div>
         <h1>Your Shopping Cart</h1>
@@ -13,7 +40,7 @@
 
 {% if items %}
     <section class="card">
-        <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+        <table class="cart-table" style="width:100%; border-collapse:collapse; table-layout:fixed;">
             <colgroup>
                 <col style="width:40%;">
                 <col style="width:12%;">

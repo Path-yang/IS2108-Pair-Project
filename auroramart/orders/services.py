@@ -56,6 +56,18 @@ def update_basket_item(item_id: int, quantity: int):
         item.save(update_fields=["quantity"])
 
 
+def remove_basket_item(item_id: int):
+    """Remove an item from the basket."""
+    try:
+        item = BasketItem.objects.get(pk=item_id)
+    except BasketItem.DoesNotExist:
+        return False
+    if item.basket.is_converted:
+        return False
+    item.delete()
+    return True
+
+
 @transaction.atomic
 def convert_basket_to_order(basket: Basket, shipping_data: dict, payment_data: dict):
     """Create an order from the basket and mark it as converted."""

@@ -175,43 +175,110 @@ class ProductListView(generic.ListView):
         ctx["show_recommendations"] = show_recommendations
         ctx["onboarding_category"] = self.request.session.get('onboarding_category')
 
-        # Add "Next best action" recommendations based on current page products
-        # Get ALL products from current page (up to 20 due to pagination)
-        # This ensures different pages give different recommendations
+        # Add "Next best action" recommendations to nudge exploration
+        # ONLY show when filters are applied (category, subcategory, or search)
         page_products = list(ctx['products'])
-
-        if page_products:
-            # Use ALL product SKUs from the current page
-            # Now that services.py processes all SKUs, this provides maximum variety
-            current_page_skus = [product.sku for product in page_products]
-
-            # Get association rule recommendations
-            next_best = recommend_associated_products(current_page_skus, limit=4)
-
-            # If show_recommendations is ON, further filter by predicted category
-            # This combines both models: decision tree filters, association rules recommend
+        
+        # Check if any filters are actually applied
+        filters_applied = False
+        current_category = None
+        current_subcategory = None
+        search_query = None
+        
+        if self.filter_form.is_valid():
+            data = self.filter_form.cleaned_data
+            current_category = data.get("category")
+            current_subcategory = data.get("subcategory")
+            search_query = data.get("q")
+            
+            # Check if any filter is actually set
+            if current_category or current_subcategory or search_query:
+                filters_applied = True
+        
+        # Also check URL parameters directly (for category links from home page)
+        if not filters_applied:
+            if self.request.GET.get("category"):
+                filters_applied = True
+                if not current_category:
+                    try:
+                        current_category = ProductCategory.objects.get(pk=self.request.GET.get("category"))
+                    except (ProductCategory.DoesNotExist, ValueError):
+                        pass
+        
+        if page_products and filters_applied:
+            # Use a sample of current page products (not all 20) for better focus
+            sample_skus = [p.sku for p in page_products[:5]]
+            
+            # If no category filter from form, check if all products are from same category
+            if not current_category and page_products:
+                categories = {p.category for p in page_products}
+                if len(categories) == 1:
+                    current_category = list(categories)[0]
+            
+            # Strategy for "nudge exploration": Show products from OTHER categories
+            if current_category:
+                # User is viewing a specific category - show products from OTHER categories
+                # Get association rule recommendations
+                next_best = recommend_associated_products(sample_skus, limit=6)
+                
+                # Filter to show products from OTHER categories (to encourage exploration)
+                next_best = [p for p in next_best if p.category != current_category]
+                
+                # If we don't have enough cross-category recommendations, add trending products from other categories
+                if len(next_best) < 4:
+                    additional = (
+                        Product.objects.filter(
+                            is_active=True
+                        )
+                        .exclude(category=current_category)
+                        .exclude(sku__in=[p.sku for p in next_best] + sample_skus)
+                        .order_by("-product_rating", "-quantity_on_hand", "-created_at")[:4 - len(next_best)]
+                    )
+                    next_best.extend(list(additional))
+                
+                # Limit to 4 for display
+                next_best = next_best[:4]
+            else:
+                # No specific category but filters applied (e.g., search query) - use association rules
+                next_best = recommend_associated_products(sample_skus, limit=4)
+            
+            # If ML recommendations are ON, we can still respect it but prioritize exploration
             if show_recommendations and self.request.session.get('onboarding_category'):
                 predicted_category = ProductCategory.objects.filter(
                     name__iexact=self.request.session.get('onboarding_category')
                 ).first()
-
+                
+                # If viewing predicted category, still show other categories for exploration
+                # If viewing other categories, prioritize predicted category products
                 if predicted_category:
-                    # Filter next_best to only include products from predicted category
-                    next_best = [p for p in next_best if p.category == predicted_category]
-
-                    # If we filtered out too many, get more from that category
-                    if len(next_best) < 4:
-                        additional = (
-                            Product.objects.filter(
-                                is_active=True,
-                                category=predicted_category
+                    if current_category == predicted_category:
+                        # Already viewing predicted category - show other categories (exploration)
+                        next_best = [p for p in next_best if p.category != predicted_category]
+                    else:
+                        # Viewing other category - show predicted category products (personalization)
+                        predicted_products = [
+                            p for p in next_best if p.category == predicted_category
+                        ]
+                        if predicted_products:
+                            next_best = predicted_products[:4]
+                        else:
+                            # Add predicted category products if not in recommendations
+                            additional = (
+                                Product.objects.filter(
+                                    is_active=True,
+                                    category=predicted_category
+                                )
+                                .exclude(sku__in=[p.sku for p in next_best] + sample_skus)
+                                .order_by("-product_rating", "-quantity_on_hand")[:4 - len(next_best)]
                             )
-                            .exclude(sku__in=[p.sku for p in next_best] + current_page_skus)
-                            .order_by("-product_rating", "-quantity_on_hand")[:4 - len(next_best)]
-                        )
-                        next_best.extend(list(additional))
-
+                            next_best = list(additional)[:4]
+            
             ctx["next_best_action"] = next_best
+            ctx["current_category"] = current_category  # Pass to template for conditional display
+        else:
+            # No filters applied - don't show next best action
+            ctx["next_best_action"] = None
+            ctx["current_category"] = None
 
         return ctx
 
@@ -303,12 +370,33 @@ class CartView(View):
         )
 
     def post(self, request):
+        # Check if this is a delete request
+        if "delete_item" in request.POST:
+            item_id = request.POST.get("line_id")
+            if item_id:
+                try:
+                    item_id = int(item_id)
+                    if order_services.remove_basket_item(item_id):
+                        messages.success(request, "Item removed from cart.")
+                    else:
+                        messages.error(request, "Unable to remove item.")
+                except (ValueError, TypeError):
+                    messages.error(request, "Invalid item.")
+            return redirect("storefront:cart")
+        
+        # Otherwise, it's an update request
         form = UpdateCartForm(request.POST)
         if form.is_valid():
-            order_services.update_basket_item(
-                form.cleaned_data["line_id"], form.cleaned_data["quantity"]
-            )
-            messages.success(request, "Cart updated.")
+            quantity = form.cleaned_data["quantity"]
+            if quantity == 0:
+                # If quantity is 0, remove the item
+                if order_services.remove_basket_item(form.cleaned_data["line_id"]):
+                    messages.success(request, "Item removed from cart.")
+            else:
+                order_services.update_basket_item(
+                    form.cleaned_data["line_id"], form.cleaned_data["quantity"]
+                )
+                messages.success(request, "Cart updated.")
         return redirect("storefront:cart")
 
 

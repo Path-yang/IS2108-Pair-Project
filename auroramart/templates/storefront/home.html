@@ -14,7 +14,10 @@
 
 <section style="margin-top:2rem;">
     <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
-        <h2>Shop by Category</h2>
+        <div>
+            <h2>Shop by Category</h2>
+            <p class="muted" style="margin-top:0.25rem;">Click any category to explore, then see "Next Best Action" recommendations from other categories!</p>
+        </div>
         <a href="{% url 'storefront:product_list' %}">View all</a>
     </header>
     <div class="card-grid">

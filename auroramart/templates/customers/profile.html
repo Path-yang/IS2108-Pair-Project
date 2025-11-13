@@ -3,15 +3,127 @@
 {% block title %}My Profile - AuroraMart{% endblock %}
 
 {% block content %}
-<div class="profile-container">
+<style>
+    .profile-header {
+        margin-bottom: 2rem;
+    }
+    .profile-sections {
+        display: grid;
+        gap: 2rem;
+    }
+    .profile-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .profile-section h2 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        color: #6b21a8;
+        font-size: 1.5rem;
+        border-bottom: 2px solid #6b21a8;
+        padding-bottom: 0.5rem;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+    .form-group input,
+    .form-group select {
+        padding: 0.625rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #6b21a8;
+        box-shadow: 0 0 0 3px rgba(107, 33, 168, 0.1);
+    }
+    .form-group input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-right: 0.5rem;
+    }
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+    }
+    .checkbox-wrapper label {
+        margin: 0;
+        font-weight: 400;
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+    .btn-primary {
+        background: #6b21a8;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #581c87;
+    }
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid #d1d5db;
+    }
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+    .field-error {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="profile-header">
     <h1>My Profile</h1>
-    
+    <p class="muted">Manage your account information and preferences</p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
     <div class="profile-sections">
         <section class="profile-section">
             <h2>Account Information</h2>
-            <form method="post" class="standard-form">
-                {% csrf_token %}
-                
+
+            <div class="form-grid">
                 <div class="form-group">
                     {{ user_form.username.label_tag }}
                     {{ user_form.username }}
@@ -19,7 +131,7 @@
                         <span class="field-error">{{ user_form.username.errors.0 }}</span>
                     {% endif %}
                 </div>
-                
+
                 <div class="form-group">
                     {{ user_form.email.label_tag }}
                     {{ user_form.email }}
@@ -27,7 +139,9 @@
                         <span class="field-error">{{ user_form.email.errors.0 }}</span>
                     {% endif %}
                 </div>
-                
+            </div>
+
+            <div class="form-grid">
                 <div class="form-group">
                     {{ user_form.first_name.label_tag }}
                     {{ user_form.first_name }}
@@ -35,7 +149,7 @@
                         <span class="field-error">{{ user_form.first_name.errors.0 }}</span>
                     {% endif %}
                 </div>
-                
+
                 <div class="form-group">
                     {{ user_form.last_name.label_tag }}
                     {{ user_form.last_name }}
@@ -43,91 +157,92 @@
                         <span class="field-error">{{ user_form.last_name.errors.0 }}</span>
                     {% endif %}
                 </div>
+            </div>
         </section>
-        
+
         <section class="profile-section">
             <h2>Personal Information</h2>
             <p class="muted" style="margin-bottom: 1.5rem;">Help us personalize your shopping experience!</p>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        {{ profile_form.age.label_tag }}
-                        {{ profile_form.age }}
-                        {% if profile_form.age.errors %}
-                            <span class="field-error">{{ profile_form.age.errors.0 }}</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        {{ profile_form.gender.label_tag }}
-                        {{ profile_form.gender }}
-                        {% if profile_form.gender.errors %}
-                            <span class="field-error">{{ profile_form.gender.errors.0 }}</span>
-                        {% endif %}
-                    </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    {{ profile_form.age.label_tag }}
+                    {{ profile_form.age }}
+                    {% if profile_form.age.errors %}
+                        <span class="field-error">{{ profile_form.age.errors.0 }}</span>
+                    {% endif %}
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        {{ profile_form.employment_status.label_tag }}
-                        {{ profile_form.employment_status }}
-                        {% if profile_form.employment_status.errors %}
-                            <span class="field-error">{{ profile_form.employment_status.errors.0 }}</span>
-                        {% endif %}
-                    </div>
+                <div class="form-group">
+                    {{ profile_form.gender.label_tag }}
+                    {{ profile_form.gender }}
+                    {% if profile_form.gender.errors %}
+                        <span class="field-error">{{ profile_form.gender.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
 
-                    <div class="form-group">
-                        {{ profile_form.occupation.label_tag }}
-                        {{ profile_form.occupation }}
-                        {% if profile_form.occupation.errors %}
-                            <span class="field-error">{{ profile_form.occupation.errors.0 }}</span>
-                        {% endif %}
-                    </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    {{ profile_form.employment_status.label_tag }}
+                    {{ profile_form.employment_status }}
+                    {% if profile_form.employment_status.errors %}
+                        <span class="field-error">{{ profile_form.employment_status.errors.0 }}</span>
+                    {% endif %}
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        {{ profile_form.education_level.label_tag }}
-                        {{ profile_form.education_level }}
-                        {% if profile_form.education_level.errors %}
-                            <span class="field-error">{{ profile_form.education_level.errors.0 }}</span>
-                        {% endif %}
-                    </div>
+                <div class="form-group">
+                    {{ profile_form.occupation.label_tag }}
+                    {{ profile_form.occupation }}
+                    {% if profile_form.occupation.errors %}
+                        <span class="field-error">{{ profile_form.occupation.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
 
-                    <div class="form-group">
-                        {{ profile_form.household_size.label_tag }}
-                        {{ profile_form.household_size }}
-                        {% if profile_form.household_size.errors %}
-                            <span class="field-error">{{ profile_form.household_size.errors.0 }}</span>
-                        {% endif %}
-                    </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    {{ profile_form.education_level.label_tag }}
+                    {{ profile_form.education_level }}
+                    {% if profile_form.education_level.errors %}
+                        <span class="field-error">{{ profile_form.education_level.errors.0 }}</span>
+                    {% endif %}
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label for="{{ profile_form.has_children.id_for_label }}">
-                            {{ profile_form.has_children }} {{ profile_form.has_children.label }}
-                        </label>
-                        {% if profile_form.has_children.errors %}
-                            <span class="field-error">{{ profile_form.has_children.errors.0 }}</span>
-                        {% endif %}
-                    </div>
+                <div class="form-group">
+                    {{ profile_form.household_size.label_tag }}
+                    {{ profile_form.household_size }}
+                    {% if profile_form.household_size.errors %}
+                        <span class="field-error">{{ profile_form.household_size.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
 
-                    <div class="form-group">
-                        {{ profile_form.monthly_income_sgd.label_tag }}
-                        {{ profile_form.monthly_income_sgd }}
-                        {% if profile_form.monthly_income_sgd.errors %}
-                            <span class="field-error">{{ profile_form.monthly_income_sgd.errors.0 }}</span>
-                        {% endif %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <div class="checkbox-wrapper">
+                        {{ profile_form.has_children }}
+                        <label for="{{ profile_form.has_children.id_for_label }}">{{ profile_form.has_children.label }}</label>
                     </div>
+                    {% if profile_form.has_children.errors %}
+                        <span class="field-error">{{ profile_form.has_children.errors.0 }}</span>
+                    {% endif %}
                 </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a href="{% url 'customers:order_history' %}" class="btn btn-secondary">View Order History</a>
+
+                <div class="form-group">
+                    {{ profile_form.monthly_income_sgd.label_tag }}
+                    {{ profile_form.monthly_income_sgd }}
+                    {% if profile_form.monthly_income_sgd.errors %}
+                        <span class="field-error">{{ profile_form.monthly_income_sgd.errors.0 }}</span>
+                    {% endif %}
                 </div>
-            </form>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'customers:order_history' %}" class="btn btn-secondary">View Order History</a>
+            </div>
         </section>
     </div>
-</div>
+</form>
 {% endblock %}

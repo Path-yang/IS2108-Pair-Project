@@ -11,8 +11,47 @@
     {% endif %}
 </header>
 
+<style>
+    /* Ensure purple header extends fully across table */
+    .cart-table {
+        margin: 0 !important;
+        border-spacing: 0 !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    .cart-table thead tr {
+        width: 100% !important;
+        display: table-row !important;
+    }
+    /* Override card padding for cart table */
+    section.card:has(.cart-table) {
+        padding: 0 !important;
+    }
+    /* Ensure proper alignment */
+    .cart-table th:nth-child(1),
+    .cart-table td:nth-child(1) {
+        text-align: left !important;
+    }
+    .cart-table th:nth-child(2),
+    .cart-table td:nth-child(2) {
+        text-align: center !important;
+    }
+    .cart-table th:nth-child(3),
+    .cart-table td:nth-child(3) {
+        text-align: center !important;
+    }
+    .cart-table th:nth-child(4),
+    .cart-table td:nth-child(4) {
+        text-align: right !important;
+    }
+    .cart-table th:nth-child(5),
+    .cart-table td:nth-child(5) {
+        text-align: center !important;
+    }
+</style>
+
 {% if items %}
-    <section class="card" style="padding:0; overflow:hidden;">
+    <section class="card" style="padding:0 !important; overflow:hidden;">
         <table class="cart-table" style="width:100%; border-collapse:collapse; table-layout:fixed;">
             <colgroup>
                 <col style="width:40%;">
@@ -33,12 +72,12 @@
             <tbody>
                 {% for item in items %}
                     <tr style="border-bottom:1px solid #e5e7eb;">
-                        <td style="padding:0.75rem; text-align:left;">
+                        <td style="padding:0.75rem; text-align:left !important; vertical-align:top;">
                             <strong>{{ item.product.name }}</strong>
                             <p class="muted" style="margin:0.25rem 0 0 0; font-size:0.875rem;">{{ item.product.sku }}</p>
                         </td>
                         <td style="padding:0.75rem; text-align:center !important; vertical-align:middle;">${{ item.unit_price|floatformat:2 }}</td>
-                        <td style="padding:0.75rem; text-align:center;">
+                        <td style="padding:0.75rem; text-align:center !important; vertical-align:middle;">
                             <form method="post" style="display:flex; gap:0.5rem; align-items:center; justify-content:center; margin:0;">
                                 {% csrf_token %}
                                 <input type="hidden" name="line_id" value="{{ item.id }}">
@@ -46,8 +85,8 @@
                                 <button type="submit" style="background:#1a73e8; color:white; border:none; padding:0.375rem 0.75rem; border-radius:0.25rem; cursor:pointer;">Update</button>
                             </form>
                         </td>
-                        <td style="padding:0.75rem; text-align:right; font-weight:600;">${{ item.line_total|floatformat:2 }}</td>
-                        <td style="padding:0.75rem; text-align:center;">
+                        <td style="padding:0.75rem; text-align:right !important; font-weight:600; vertical-align:middle;">${{ item.line_total|floatformat:2 }}</td>
+                        <td style="padding:0.75rem; text-align:center !important; vertical-align:middle;">
                             <div style="display:flex; gap:0.5rem; align-items:center; justify-content:center;">
                                 <a href="{% url 'storefront:product_detail' item.product.sku %}" style="color:#1a73e8; text-decoration:none;">View</a>
                                 <form method="post" style="display:inline; margin:0;">

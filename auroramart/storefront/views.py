@@ -176,10 +176,14 @@ class ProductListView(generic.ListView):
         ctx["onboarding_category"] = self.request.session.get('onboarding_category')
 
         # Add "Next best action" recommendations based on current page products
-        # Use a sample of SKUs from current page (limit to 5 to avoid overwhelming the model)
-        current_page_skus = [product.sku for product in ctx['products'][:5]]
+        # Get ALL products from current page (up to 20 due to pagination)
+        # This ensures different pages give different recommendations
+        page_products = list(ctx['products'])
 
-        if current_page_skus:
+        if page_products:
+            # Use ALL product SKUs from the current page for better variety
+            current_page_skus = [product.sku for product in page_products]
+
             # Get association rule recommendations
             next_best = recommend_associated_products(current_page_skus, limit=4)
 

@@ -58,8 +58,20 @@
                             <td>{{ customer.get_employment_status_display }}</td>
                             <td>${{ customer.monthly_income_sgd|floatformat:2 }}</td>
                             <td>{{ customer.preferred_category_label|default:"-" }}</td>
-                            <td>
+                            <td class="action-buttons">
                                 <a href="{% url 'customers:staff_customer_detail' customer.pk %}" class="btn btn-sm btn-primary">View</a>
+                                <form method="post" action="{% url 'customers:staff_customer_toggle' customer.pk %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    {% if customer.user and customer.user.is_active %}
+                                        <button type="submit" class="btn btn-sm btn-warning">Disable</button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-sm btn-success">Enable</button>
+                                    {% endif %}
+                                </form>
+                                <form method="post" action="{% url 'customers:staff_customer_delete' customer.pk %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this customer? This action cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                </form>
                             </td>
                         </tr>
                     {% endfor %}

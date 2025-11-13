@@ -98,9 +98,12 @@ class OrderHistoryView(LoginRequiredMixin, generic.ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        return Order.objects.filter(
-            customer_email=self.request.user.email
-        ).order_by("-created_at")
+        # Get the customer profile for the logged-in user
+        try:
+            profile = self.request.user.customer_profile
+            return Order.objects.filter(customer=profile).order_by("-created_at")
+        except CustomerProfile.DoesNotExist:
+            return Order.objects.none()
 
 
 # Staff-only views for customer management (ADM-09, ADM-10, ADM-11)
@@ -159,13 +162,10 @@ class StaffCustomerDetailView(StaffRequiredMixin, generic.DetailView):
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        # Get orders if user account is linked
-        if self.object.user:
-            ctx["orders"] = Order.objects.filter(
-                customer_email=self.object.user.email
-            ).order_by("-created_at")[:10]
-        else:
-            ctx["orders"] = Order.objects.none()
+        # Get orders for this customer profile
+        ctx["orders"] = Order.objects.filter(
+            customer=self.object
+        ).order_by("-created_at")[:10]
         return ctx
 
 
@@ -189,4 +189,33 @@ class StaffCustomerToggleActiveView(StaffRequiredMixin, generic.View):
         status = "enabled" if profile.user.is_active else "disabled"
         messages.success(request, f"Customer account {profile.user.username} has been {status}.")
         return redirect("customers:staff_customer_detail", pk=pk)
+
+
+class StaffCustomerDeleteView(StaffRequiredMixin, generic.View):
+    """Staff view to delete customer profiles from the system."""
+    
+    def post(self, request, pk):
+        profile = get_object_or_404(CustomerProfile, pk=pk)
+        
+        # Prevent deletion of staff accounts
+        if profile.user and profile.user.is_staff:
+            messages.error(request, "Cannot delete staff accounts.")
+            return redirect("customers:staff_customer_detail", pk=pk)
+        
+        customer_name = ""
+        if profile.user:
+            if profile.user.first_name or profile.user.last_name:
+                customer_name = f"{profile.user.first_name} {profile.user.last_name}".strip()
+            else:
+                customer_name = profile.user.username
+            # Delete the associated user account if it exists
+            profile.user.delete()
+        else:
+            customer_name = f"Customer #{profile.pk}"
+        
+        # Delete the profile (user deletion will cascade if linked)
+        profile.delete()
+        
+        messages.success(request, f"Customer {customer_name} has been removed from the system.")
+        return redirect("customers:staff_customer_list")
 

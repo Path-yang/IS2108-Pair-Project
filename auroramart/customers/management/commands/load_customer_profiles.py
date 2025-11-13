@@ -2,6 +2,7 @@ import csv
 from decimal import Decimal
 from pathlib import Path
 
+from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandParser
 
 from catalog.models import ProductCategory
@@ -27,12 +28,32 @@ class Command(BaseCommand):
 
         created = 0
         updated = 0
+        customer_counter = 1  # Starting counter for customer IDs
 
         with profiles_path.open(encoding="utf-8", errors="ignore") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 preferred_label = row["preferred_category"].strip()
                 category = self._resolve_category(preferred_label)
+                
+                # Create a unique username for this customer
+                username = f"customer{customer_counter}"
+                email = f"{username}@auroramart.com"
+                
+                # Create or get user account (all active by default)
+                user, user_created = User.objects.get_or_create(
+                    username=username,
+                    defaults={
+                        'email': email,
+                        'is_active': True,
+                        'is_staff': False,
+                    }
+                )
+                
+                # Set a default password if user was just created
+                if user_created:
+                    user.set_password('password123')
+                    user.save()
 
                 profile, created_flag = CustomerProfile.objects.update_or_create(
                     age=int(row["age"]),
@@ -46,13 +67,21 @@ class Command(BaseCommand):
                     defaults={
                         "preferred_category_label": preferred_label,
                         "preferred_category": category,
+                        "user": user,
                     },
                 )
+                
+                # If profile exists but has no user, link it
+                if not created_flag and not profile.user:
+                    profile.user = user
+                    profile.save()
 
                 if created_flag:
                     created += 1
                 else:
                     updated += 1
+                    
+                customer_counter += 1
 
         self.stdout.write(
             self.style.SUCCESS(

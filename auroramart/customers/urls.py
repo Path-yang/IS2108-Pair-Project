@@ -20,4 +20,5 @@ urlpatterns = [
     path("staff/list/", views.StaffCustomerListView.as_view(), name="staff_customer_list"),
     path("staff/<int:pk>/", views.StaffCustomerDetailView.as_view(), name="staff_customer_detail"),
     path("staff/<int:pk>/toggle/", views.StaffCustomerToggleActiveView.as_view(), name="staff_customer_toggle"),
+    path("staff/<int:pk>/delete/", views.StaffCustomerDeleteView.as_view(), name="staff_customer_delete"),
 ]

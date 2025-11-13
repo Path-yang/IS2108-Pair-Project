@@ -96,22 +96,27 @@ def recommend_associated_products(
     basket_skus = list({sku for sku in basket_skus if sku})
     rules = get_association_rules()
     if rules is None:
+        logger.info("Association rules not loaded, using fallback")
         return _fallback_association_recommendations(basket_skus, limit)
 
     # Query the DataFrame for rules where basket items are in antecedents
     # Process ALL input SKUs to ensure variety in recommendations
     suggestions = []
+    matched_count = 0
     for sku in basket_skus:
         # Find rules where this SKU is in the antecedents
         matched_rules = rules[rules['antecedents'].apply(lambda x: sku in x)]
 
         if not matched_rules.empty:
+            matched_count += 1
             # Sort by confidence (highest first) and get consequents
             top_rules = matched_rules.sort_values(by='confidence', ascending=False).head(5)
 
             for _, row in top_rules.iterrows():
                 # Add all items from consequents
                 suggestions.extend(list(row['consequents']))
+
+    logger.info(f"Processed {len(basket_skus)} SKUs, {matched_count} had rules, {len(suggestions)} suggestions before dedup")
 
     # Remove duplicates and items already in basket, preserving order
     unique_skus = []

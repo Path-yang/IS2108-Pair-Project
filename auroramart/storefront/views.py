@@ -171,8 +171,42 @@ class ProductListView(generic.ListView):
         ctx["highlight_category"] = highlight
 
         # Pass toggle state and onboarding data to template
-        ctx["show_recommendations"] = self.request.session.get('show_recommendations', False)
+        show_recommendations = self.request.session.get('show_recommendations', False)
+        ctx["show_recommendations"] = show_recommendations
         ctx["onboarding_category"] = self.request.session.get('onboarding_category')
+
+        # Add "Next best action" recommendations based on current page products
+        # Use a sample of SKUs from current page (limit to 5 to avoid overwhelming the model)
+        current_page_skus = [product.sku for product in ctx['products'][:5]]
+
+        if current_page_skus:
+            # Get association rule recommendations
+            next_best = recommend_associated_products(current_page_skus, limit=4)
+
+            # If show_recommendations is ON, further filter by predicted category
+            # This combines both models: decision tree filters, association rules recommend
+            if show_recommendations and self.request.session.get('onboarding_category'):
+                predicted_category = ProductCategory.objects.filter(
+                    name__iexact=self.request.session.get('onboarding_category')
+                ).first()
+
+                if predicted_category:
+                    # Filter next_best to only include products from predicted category
+                    next_best = [p for p in next_best if p.category == predicted_category]
+
+                    # If we filtered out too many, get more from that category
+                    if len(next_best) < 4:
+                        additional = (
+                            Product.objects.filter(
+                                is_active=True,
+                                category=predicted_category
+                            )
+                            .exclude(sku__in=[p.sku for p in next_best] + current_page_skus)
+                            .order_by("-product_rating", "-quantity_on_hand")[:4 - len(next_best)]
+                        )
+                        next_best.extend(list(additional))
+
+            ctx["next_best_action"] = next_best
 
         return ctx
 

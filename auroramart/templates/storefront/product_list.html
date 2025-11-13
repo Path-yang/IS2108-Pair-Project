@@ -53,6 +53,23 @@
     </div>
 {% endif %}
 
+{% if next_best_action %}
+<section style="margin-top:2rem;">
+    <h2>Next best action</h2>
+    <p class="muted">Customers who viewed these products also bought:</p>
+    <div class="card-grid" style="margin-top:1rem;">
+        {% for product in next_best_action %}
+            <article class="card">
+                <h3>{{ product.name }}</h3>
+                <p class="muted">{{ product.category.name }}</p>
+                <p style="font-weight:700;">${{ product.unit_price }}</p>
+                <a class="button" href="{% url 'storefront:product_detail' product.sku %}">View details</a>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
 {% if onboarding_category %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {

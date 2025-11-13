@@ -23,8 +23,8 @@
         width: 100% !important;
         display: table-row !important;
     }
-    /* Override card padding for cart table */
-    section.card {
+    /* Override card padding for cart table container */
+    .cart-container.card {
         padding: 0 !important;
     }
     /* Ensure proper alignment */
@@ -51,7 +51,7 @@
 </style>
 
 {% if items %}
-    <section class="card" style="padding:0 !important; overflow:hidden;">
+    <section class="card cart-container" style="padding:0 !important; overflow:hidden;">
         <table class="cart-table" style="width:100%; border-collapse:collapse; table-layout:fixed;">
             <colgroup>
                 <col style="width:40%;">

@@ -10,7 +10,10 @@
 <body>
     <header class="site-header">
         <div class="wrapper">
-            <a href="{% url 'storefront:home' %}" class="logo">AuroraMart</a>
+            <a href="{% url 'storefront:home' %}" class="logo-link">
+                <img src="{% static 'images/auroramart-logo.png' %}" alt="AuroraMart" class="logo-icon">
+                <span class="logo-text">AuroraMart</span>
+            </a>
             <nav>
                 <a href="{% url 'storefront:product_list' %}">Shop</a>
                 <a href="{% url 'storefront:cart' %}">Cart</a>

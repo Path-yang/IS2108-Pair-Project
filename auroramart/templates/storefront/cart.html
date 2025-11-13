@@ -12,20 +12,44 @@
 </header>
 
 <style>
-    /* Ensure purple header extends fully across table */
-    .cart-table {
+    /* Override card padding for cart table container */
+    .cart-container.card {
+        padding: 0 !important;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    /* Override the display:block from .card table that breaks table layout */
+    .cart-container .cart-table {
+        display: table !important;
         margin: 0 !important;
         border-spacing: 0 !important;
         width: 100% !important;
         border-collapse: collapse !important;
+        border-radius: 0;
+    }
+    .cart-table thead {
+        display: table-header-group !important;
+    }
+    .cart-table tbody {
+        display: table-row-group !important;
     }
     .cart-table thead tr {
+        display: table-row !important;
         width: 100% !important;
+    }
+    .cart-table tbody tr {
         display: table-row !important;
     }
-    /* Override card padding for cart table container */
-    .cart-container.card {
-        padding: 0 !important;
+    .cart-table th,
+    .cart-table td {
+        display: table-cell !important;
+    }
+    /* Ensure purple header extends fully - remove border radius from first row */
+    .cart-table thead tr:first-child th:first-child {
+        border-top-left-radius: 10px;
+    }
+    .cart-table thead tr:first-child th:last-child {
+        border-top-right-radius: 10px;
     }
     /* Ensure proper alignment */
     .cart-table th:nth-child(1),

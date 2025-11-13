@@ -181,17 +181,9 @@ class ProductListView(generic.ListView):
         page_products = list(ctx['products'])
 
         if page_products:
-            # Sample products evenly from the page for variety
-            # This prevents first few products from dominating recommendations
-            sample_size = min(5, len(page_products))
-            if len(page_products) > sample_size:
-                # Take evenly distributed samples across the page
-                step = len(page_products) // sample_size
-                sampled_products = [page_products[i * step] for i in range(sample_size)]
-            else:
-                sampled_products = page_products
-
-            current_page_skus = [product.sku for product in sampled_products]
+            # Use ALL product SKUs from the current page
+            # Now that services.py processes all SKUs, this provides maximum variety
+            current_page_skus = [product.sku for product in page_products]
 
             # Get association rule recommendations
             next_best = recommend_associated_products(current_page_skus, limit=4)

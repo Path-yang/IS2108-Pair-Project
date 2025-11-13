@@ -99,6 +99,7 @@ def recommend_associated_products(
         return _fallback_association_recommendations(basket_skus, limit)
 
     # Query the DataFrame for rules where basket items are in antecedents
+    # Process ALL input SKUs to ensure variety in recommendations
     suggestions = []
     for sku in basket_skus:
         # Find rules where this SKU is in the antecedents
@@ -111,12 +112,6 @@ def recommend_associated_products(
             for _, row in top_rules.iterrows():
                 # Add all items from consequents
                 suggestions.extend(list(row['consequents']))
-
-                if len(suggestions) >= limit * 2:  # Get extra to filter out duplicates
-                    break
-
-        if len(suggestions) >= limit * 2:
-            break
 
     # Remove duplicates and items already in basket, preserving order
     unique_skus = []

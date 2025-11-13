@@ -291,12 +291,26 @@ table {
     display: block;
 }
 
-.card table thead,
-.card table tbody,
-.card table tr {
-    display: table;
+.card table {
     width: 100%;
-    table-layout: auto;
+    border-collapse: collapse;
+}
+
+.card table thead,
+.card table tbody {
+    width: 100%;
+}
+
+.card table thead {
+    display: table-header-group;
+}
+
+.card table tbody {
+    display: table-row-group;
+}
+
+.card table tr {
+    display: table-row;
 }
 
 th, td {

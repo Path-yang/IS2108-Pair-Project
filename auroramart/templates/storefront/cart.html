@@ -123,12 +123,7 @@
                         <td style="padding:0.75rem; text-align:center !important; vertical-align:middle;">
                             <div style="display:flex; gap:0.5rem; align-items:center; justify-content:center;">
                                 <a href="{% url 'storefront:product_detail' item.product.sku %}" style="color:#1a73e8; text-decoration:none;">View</a>
-                                <form method="post" style="display:inline; margin:0;">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="line_id" value="{{ item.id }}">
-                                    <input type="hidden" name="delete_item" value="1">
-                                    <button type="submit" style="background:#dc2626; color:white; border:none; padding:0.375rem 0.75rem; border-radius:0.25rem; cursor:pointer; font-size:0.875rem;" onclick="return confirm('Remove this item from your cart?')">Delete</button>
-                                </form>
+                                <button type="button" class="delete-item-btn" data-item-id="{{ item.id }}" data-item-name="{{ item.product.name }}" style="background:#dc2626; color:white; border:none; padding:0.375rem 0.75rem; border-radius:0.25rem; cursor:pointer; font-size:0.875rem;">Delete</button>
                             </div>
                         </td>
                     </tr>
@@ -167,5 +162,135 @@
     </div>
 </section>
 {% endif %}
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Remove Item</h3>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to remove <strong id="modal-item-name"></strong> from your cart?</p>
+        </div>
+        <div class="modal-footer">
+            <form id="delete-form" method="post" style="display:inline; margin:0;">
+                {% csrf_token %}
+                <input type="hidden" name="line_id" id="modal-item-id">
+                <input type="hidden" name="delete_item" value="1">
+                <button type="button" class="modal-cancel-btn" style="background:#6b7280; color:white; border:none; padding:0.5rem 1.5rem; border-radius:0.25rem; cursor:pointer; margin-right:0.5rem;">Cancel</button>
+                <button type="submit" class="modal-confirm-btn" style="background:#dc2626; color:white; border:none; padding:0.5rem 1.5rem; border-radius:0.25rem; cursor:pointer;">Remove</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: auto;
+    padding: 0;
+    border-radius: 0.5rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('deleteModal');
+    const deleteButtons = document.querySelectorAll('.delete-item-btn');
+    const cancelBtn = document.querySelector('.modal-cancel-btn');
+    const confirmBtn = document.querySelector('.modal-confirm-btn');
+    const deleteForm = document.getElementById('delete-form');
+    const itemNameSpan = document.getElementById('modal-item-name');
+    const itemIdInput = document.getElementById('modal-item-id');
+
+    // Open modal when delete button is clicked
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-item-id');
+            const itemName = this.getAttribute('data-item-name');
+            itemIdInput.value = itemId;
+            itemNameSpan.textContent = itemName;
+            modal.style.display = 'flex';
+        });
+    });
+
+    // Close modal when cancel is clicked
+    cancelBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        }
+    });
+});
+</script>
 {% endblock %}
 

@@ -69,13 +69,26 @@ class ProductFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["category"].queryset = ProductCategory.objects.all()
-        category = self.data.get("category") or self.initial.get("category")
+        
+        # Get category from data or initial
+        category = None
+        if self.data:
+            category = self.data.get("category")
+        elif self.initial:
+            category = self.initial.get("category")
+        
+        # Filter subcategories based on selected category
         if category:
-            self.fields["subcategory"].queryset = ProductSubcategory.objects.filter(
-                category_id=category
-            )
+            try:
+                category_id = int(category)
+                self.fields["subcategory"].queryset = ProductSubcategory.objects.filter(
+                    category_id=category_id
+                )
+            except (ValueError, TypeError):
+                self.fields["subcategory"].queryset = ProductSubcategory.objects.none()
         else:
-            self.fields["subcategory"].queryset = ProductSubcategory.objects.all()
+            # If no category selected, show no subcategories (user must select category first)
+            self.fields["subcategory"].queryset = ProductSubcategory.objects.none()
 
 
 class AddToCartForm(forms.Form):

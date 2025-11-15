@@ -1,67 +1,111 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Order History - AuroraMart{% endblock %}
 
 {% block content %}
-<div class="order-history-container">
-    <h1>Order History</h1>
+<div style="max-width: 1200px; margin: 0 auto; padding: 2rem 1rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <h1 style="margin: 0; font-size: 2rem; font-weight: 600; color: #1f2937;">Order History</h1>
+        <a href="{% url 'customers:profile' %}" class="button" style="background: #6b7280; text-decoration: none;">Back to Profile</a>
+    </div>
     
     {% if orders %}
-        <div class="orders-list">
+        <div style="display: grid; gap: 1.5rem;">
             {% for order in orders %}
-                <div class="order-card">
-                    <div class="order-header">
-                        <h3>Order #{{ order.order_number }}</h3>
-                        <span class="order-date">{{ order.created_at|date:"F d, Y" }}</span>
+                <div class="order-card" style="background: #ffffff; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); overflow: hidden; transition: box-shadow 0.3s ease;">
+                    <!-- Order Header -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem; color: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 600; color: white;">Order #{{ order.order_number }}</h2>
+                                <p style="margin: 0; opacity: 0.9; font-size: 0.95rem;">Placed on {{ order.created_at|date:"F d, Y" }} at {{ order.created_at|date:"g:i A" }}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.875rem; opacity: 0.9;">Status</span>
+                                    <div style="font-weight: 600; font-size: 1rem;">{{ order.get_status_display|default:"Placed" }}</div>
+                                </div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: white;">${{ order.total_amount|floatformat:2 }}</div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="order-details">
-                        <p><strong>Status:</strong> {{ order.get_status_display }}</p>
-                        <p><strong>Total:</strong> ${{ order.total_amount }}</p>
-                        
-                        {% if order.shipping_address %}
-                            <p><strong>Shipped to:</strong> {{ order.shipping_address }}</p>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="order-items">
-                        <h4>Items:</h4>
-                        <ul>
-                            {% for item in order.items.all %}
-                                <li>{{ item.product_name }} - Qty: {{ item.quantity }} - ${{ item.price }}</li>
+                    <!-- Order Items -->
+                    <div style="padding: 1.5rem;">
+                        <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; color: #1f2937;">Items ({{ order.basket.items.count }})</h3>
+                        <div style="display: grid; gap: 1rem;">
+                            {% for item in order.basket.items.all %}
+                                <div style="display: flex; gap: 1rem; align-items: center; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
+                                    <img src="{% static 'images/product-placeholder.svg' %}" alt="{{ item.product.name }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.375rem; background: #f3f4f6; flex-shrink: 0;">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; font-weight: 600; color: #1f2937; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ item.product.name }}</h4>
+                                        <p style="margin: 0; font-size: 0.875rem; color: #6b7280;">SKU: {{ item.product.sku }}</p>
+                                    </div>
+                                    <div style="text-align: right; flex-shrink: 0;">
+                                        <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">Qty: {{ item.quantity }}</div>
+                                        <div style="font-size: 1rem; font-weight: 600; color: #1f2937;">${{ item.line_total|floatformat:2 }}</div>
+                                        <div style="font-size: 0.75rem; color: #9ca3af;">${{ item.unit_price|floatformat:2 }} each</div>
+                                    </div>
+                                </div>
                             {% endfor %}
-                        </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Footer -->
+                    <div style="padding: 1rem 1.5rem; background: #f9fafb; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div style="font-size: 0.875rem; color: #6b7280;">
+                            <strong>Total:</strong> <span style="font-size: 1.25rem; font-weight: 700; color: #1f2937; margin-left: 0.5rem;">${{ order.total_amount|floatformat:2 }}</span>
+                        </div>
+                        <a href="{% url 'storefront:product_list' %}" class="button" style="text-decoration: none; background: #667eea; color: white;">Shop Again</a>
                     </div>
                 </div>
             {% endfor %}
         </div>
         
+        <!-- Pagination -->
         {% if is_paginated %}
-            <div class="pagination">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem; flex-wrap: wrap;">
                 {% if page_obj.has_previous %}
-                    <a href="?page=1" class="btn btn-secondary">First</a>
-                    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">Previous</a>
+                    <a href="?page=1" class="button" style="background: #6b7280; text-decoration: none;">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="button" style="background: #6b7280; text-decoration: none;">Previous</a>
                 {% endif %}
                 
-                <span class="page-info">
+                <span style="padding: 0.5rem 1rem; background: #f3f4f6; border-radius: 0.25rem; color: #4b5563; font-weight: 500;">
                     Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
                 </span>
                 
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">Next</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary">Last</a>
+                    <a href="?page={{ page_obj.next_page_number }}" class="button" style="background: #6b7280; text-decoration: none;">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="button" style="background: #6b7280; text-decoration: none;">Last</a>
                 {% endif %}
             </div>
         {% endif %}
     {% else %}
-        <div class="empty-state">
-            <p>You haven't placed any orders yet.</p>
-            <a href="{% url 'storefront:product_list' %}" class="btn btn-primary">Start Shopping</a>
+        <div style="text-align: center; padding: 4rem 2rem; background: #ffffff; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
+            <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 600; color: #1f2937;">No orders yet</h2>
+            <p style="margin: 0 0 2rem 0; color: #6b7280;">You haven't placed any orders yet. Start shopping to see your order history here!</p>
+            <a href="{% url 'storefront:product_list' %}" class="button" style="background: #667eea; color: white; text-decoration: none; display: inline-block;">Start Shopping</a>
         </div>
     {% endif %}
-    
-    <div class="profile-link">
-        <a href="{% url 'customers:profile' %}" class="btn btn-secondary">Back to Profile</a>
-    </div>
 </div>
+
+<style>
+.order-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 768px) {
+    .order-card > div:first-child > div {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .order-card > div:first-child > div > div:last-child {
+        text-align: left !important;
+        width: 100%;
+    }
+}
+</style>
 {% endblock %}

@@ -69,7 +69,7 @@ def remove_basket_item(item_id: int):
 
 
 @transaction.atomic
-def convert_basket_to_order(basket: Basket, shipping_data: dict, payment_data: dict):
+def convert_basket_to_order(basket: Basket, shipping_data: dict, payment_data: dict, customer_profile=None):
     """Create an order from the basket and mark it as converted."""
     if basket.is_converted or not basket.items.exists():
         return basket.order if hasattr(basket, "order") else None
@@ -88,6 +88,7 @@ def convert_basket_to_order(basket: Basket, shipping_data: dict, payment_data: d
         order_number=order_number,
         total_amount=total_amount,
         status="Placed",
+        customer=customer_profile,
     )
     basket.is_converted = True
     basket.save(update_fields=["is_converted"])

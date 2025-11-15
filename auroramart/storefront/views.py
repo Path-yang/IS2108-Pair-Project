@@ -177,7 +177,13 @@ class ProductListView(generic.ListView):
             if predicted_category:
                 queryset = queryset.filter(category=predicted_category)
 
+        # Initialize form with GET parameters
         self.filter_form = ProductFilterForm(self.request.GET or None)
+        
+        # If category is in URL but not in form data, add it to form initial
+        if not self.filter_form.data and self.request.GET.get("category"):
+            self.filter_form = ProductFilterForm(initial={"category": self.request.GET.get("category")})
+        
         if self.filter_form.is_valid():
             data = self.filter_form.cleaned_data
             if data.get("q"):
@@ -206,6 +212,9 @@ class ProductListView(generic.ListView):
         if highlight:
             highlight = highlight.replace("+", " ")
         ctx["highlight_category"] = highlight
+        
+        # Pass all subcategories for JavaScript filtering
+        ctx["all_subcategories"] = ProductSubcategory.objects.select_related("category").all()
 
         # Pass toggle state and onboarding data to template
         show_recommendations = self.request.session.get('show_recommendations', False)
@@ -572,7 +581,16 @@ class ReviewView(LoginRequiredMixin, View):
         if not (shipping and payment):
             messages.error(request, "Please complete the checkout steps.")
             return redirect("storefront:checkout_shipping")
-        order = order_services.convert_basket_to_order(basket, shipping, payment)
+        
+        # Get customer profile if user is authenticated
+        customer_profile = None
+        if request.user.is_authenticated:
+            try:
+                customer_profile = request.user.customer_profile
+            except CustomerProfile.DoesNotExist:
+                pass
+        
+        order = order_services.convert_basket_to_order(basket, shipping, payment, customer_profile=customer_profile)
         order_services.clear_basket_session(request)
         request.session["checkout_shipping"] = shipping
         request.session["last_order_number"] = order.order_number if order else ""

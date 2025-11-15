@@ -14,6 +14,7 @@ from .forms import (
     CustomerProfileForm,
     CustomerRegistrationForm,
     EmailAuthenticationForm,
+    ShippingInfoForm,
     UserProfileUpdateForm,
 )
 from .models import CustomerProfile
@@ -78,9 +79,11 @@ class CustomerProfileView(LoginRequiredMixin, generic.TemplateView):
         try:
             profile = self.request.user.customer_profile
             ctx["profile_form"] = CustomerProfileForm(instance=profile)
+            ctx["shipping_form"] = ShippingInfoForm(instance=profile)
             ctx["has_profile"] = True
         except CustomerProfile.DoesNotExist:
             ctx["profile_form"] = CustomerProfileForm()
+            ctx["shipping_form"] = ShippingInfoForm()
             ctx["has_profile"] = False
             # If user has onboarding category in session but no profile, suggest completing onboarding
             if self.request.session.get("onboarding_category"):
@@ -105,15 +108,20 @@ class CustomerProfileView(LoginRequiredMixin, generic.TemplateView):
         try:
             profile = request.user.customer_profile
             profile_form = CustomerProfileForm(request.POST, instance=profile)
+            shipping_form = ShippingInfoForm(request.POST, instance=profile)
         except CustomerProfile.DoesNotExist:
             profile_form = CustomerProfileForm(request.POST)
+            shipping_form = ShippingInfoForm(request.POST)
         
-        if user_form.is_valid() and profile_form.is_valid():
+        if user_form.is_valid() and profile_form.is_valid() and shipping_form.is_valid():
             user_form.save()
             profile = profile_form.save(commit=False)
             if not profile.user_id:
                 profile.user = request.user
             profile.save()
+            # Save shipping information
+            shipping_form.instance = profile
+            shipping_form.save()
             messages.success(request, "Profile updated successfully.")
             return redirect("customers:profile")
         
@@ -123,6 +131,7 @@ class CustomerProfileView(LoginRequiredMixin, generic.TemplateView):
             {
                 "user_form": user_form,
                 "profile_form": profile_form,
+                "shipping_form": shipping_form,
                 "has_profile": hasattr(request.user, "customer_profile"),
             },
         )

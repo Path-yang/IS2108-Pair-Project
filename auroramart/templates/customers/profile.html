@@ -60,23 +60,59 @@
                 <div class="card-body">
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="{{ user_form.shipping_address.id_for_label }}">Shipping address</label>
-                            {{ user_form.shipping_address }}
-                            {% if user_form.shipping_address.errors %}
-                                <span class="field-error">{{ user_form.shipping_address.errors.0 }}</span>
+                            <label for="{{ shipping_form.shipping_full_name.id_for_label }}">{{ shipping_form.shipping_full_name.label }}</label>
+                            {{ shipping_form.shipping_full_name }}
+                            {% if shipping_form.shipping_full_name.errors %}
+                                <span class="field-error">{{ shipping_form.shipping_full_name.errors.0 }}</span>
                             {% endif %}
-                            <small class="form-help">{{ user_form.shipping_address.help_text }}</small>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="{{ user_form.phone_number.id_for_label }}">Phone number</label>
-                            {{ user_form.phone_number }}
-                            {% if user_form.phone_number.errors %}
-                                <span class="field-error">{{ user_form.phone_number.errors.0 }}</span>
+                            <label for="{{ shipping_form.shipping_address_line_1.id_for_label }}">{{ shipping_form.shipping_address_line_1.label }}</label>
+                            {{ shipping_form.shipping_address_line_1 }}
+                            {% if shipping_form.shipping_address_line_1.errors %}
+                                <span class="field-error">{{ shipping_form.shipping_address_line_1.errors.0 }}</span>
                             {% endif %}
-                            <small class="form-help">{{ user_form.phone_number.help_text }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ shipping_form.shipping_address_line_2.id_for_label }}">{{ shipping_form.shipping_address_line_2.label }}</label>
+                            {{ shipping_form.shipping_address_line_2 }}
+                            {% if shipping_form.shipping_address_line_2.errors %}
+                                <span class="field-error">{{ shipping_form.shipping_address_line_2.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label for="{{ shipping_form.shipping_city.id_for_label }}">{{ shipping_form.shipping_city.label }}</label>
+                            {{ shipping_form.shipping_city }}
+                            {% if shipping_form.shipping_city.errors %}
+                                <span class="field-error">{{ shipping_form.shipping_city.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ shipping_form.shipping_postal_code.id_for_label }}">{{ shipping_form.shipping_postal_code.label }}</label>
+                            {{ shipping_form.shipping_postal_code }}
+                            {% if shipping_form.shipping_postal_code.errors %}
+                                <span class="field-error">{{ shipping_form.shipping_postal_code.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ shipping_form.shipping_contact_number.id_for_label }}">{{ shipping_form.shipping_contact_number.label }}</label>
+                            {{ shipping_form.shipping_contact_number }}
+                            {% if shipping_form.shipping_contact_number.errors %}
+                                <span class="field-error">{{ shipping_form.shipping_contact_number.errors.0 }}</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

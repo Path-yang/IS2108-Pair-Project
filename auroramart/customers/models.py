@@ -46,6 +46,13 @@ class CustomerProfile(models.Model):
         null=True,
         blank=True,
     )
+    # Shipping information fields
+    shipping_full_name = models.CharField(max_length=128, blank=True, null=True)
+    shipping_address_line_1 = models.CharField(max_length=255, blank=True, null=True)
+    shipping_address_line_2 = models.CharField(max_length=255, blank=True, null=True)
+    shipping_city = models.CharField(max_length=64, blank=True, null=True)
+    shipping_postal_code = models.CharField(max_length=16, blank=True, null=True)
+    shipping_contact_number = models.CharField(max_length=24, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

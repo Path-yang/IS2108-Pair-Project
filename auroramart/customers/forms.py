@@ -71,18 +71,6 @@ class CustomerProfileForm(forms.ModelForm):
 class UserProfileUpdateForm(forms.ModelForm):
     """Form for updating user account information."""
     
-    shipping_address = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Enter your full shipping address'}),
-        required=False,
-        help_text="Your default shipping address for orders"
-    )
-    phone_number = forms.CharField(
-        max_length=20,
-        required=False,
-        widget=forms.TextInput(attrs={'placeholder': '+65 1234 5678'}),
-        help_text="Contact number for delivery"
-    )
-    
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email"]
@@ -90,6 +78,43 @@ class UserProfileUpdateForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'placeholder': 'your.email@example.com'}),
             'first_name': forms.TextInput(attrs={'placeholder': 'First Name'}),
             'last_name': forms.TextInput(attrs={'placeholder': 'Last Name'}),
+        }
+
+
+class ShippingInfoForm(forms.ModelForm):
+    """Form for updating shipping information - matches checkout shipping form."""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make all fields optional for profile editing
+        for field in self.fields.values():
+            field.required = False
+    
+    class Meta:
+        model = CustomerProfile
+        fields = [
+            "shipping_full_name",
+            "shipping_address_line_1",
+            "shipping_address_line_2",
+            "shipping_city",
+            "shipping_postal_code",
+            "shipping_contact_number",
+        ]
+        widgets = {
+            'shipping_full_name': forms.TextInput(attrs={'placeholder': 'Full Name'}),
+            'shipping_address_line_1': forms.TextInput(attrs={'placeholder': 'Address Line 1'}),
+            'shipping_address_line_2': forms.TextInput(attrs={'placeholder': 'Address Line 2 (Optional)'}),
+            'shipping_city': forms.TextInput(attrs={'placeholder': 'City'}),
+            'shipping_postal_code': forms.TextInput(attrs={'placeholder': 'Postal Code'}),
+            'shipping_contact_number': forms.TextInput(attrs={'placeholder': '+65 1234 5678'}),
+        }
+        labels = {
+            'shipping_full_name': 'Full Name',
+            'shipping_address_line_1': 'Address Line 1',
+            'shipping_address_line_2': 'Address Line 2',
+            'shipping_city': 'City',
+            'shipping_postal_code': 'Postal Code',
+            'shipping_contact_number': 'Contact Number',
         }
 
 

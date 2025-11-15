@@ -525,6 +525,23 @@ class ShippingView(LoginRequiredMixin, View):
 
     def get(self, request):
         initial = request.session.get("checkout_shipping", {})
+        
+        # If no session data, try to pre-populate from user's profile
+        if not initial and request.user.is_authenticated:
+            try:
+                profile = request.user.customer_profile
+                if profile.shipping_full_name:
+                    initial = {
+                        "full_name": profile.shipping_full_name,
+                        "address_line_1": profile.shipping_address_line_1 or "",
+                        "address_line_2": profile.shipping_address_line_2 or "",
+                        "city": profile.shipping_city or "",
+                        "postal_code": profile.shipping_postal_code or "",
+                        "contact_number": profile.shipping_contact_number or "",
+                    }
+            except CustomerProfile.DoesNotExist:
+                pass
+        
         form = self.form_class(initial=initial)
         return render(request, self.template_name, {"form": form})
 

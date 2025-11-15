@@ -37,17 +37,17 @@
                 <form method="post" action="{% url 'customers:staff_customer_toggle' customer.pk %}" style="display:inline;">
                     {% csrf_token %}
                     {% if customer.user.is_active %}
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Disable this customer account?')">
+                        <button type="submit" class="btn btn-danger btn-account-action" onclick="return confirm('Disable this customer account?')">
                             Disable Account
                         </button>
                     {% else %}
-                        <button type="submit" class="btn btn-secondary" onclick="return confirm('Enable this customer account?')">
+                        <button type="submit" class="btn btn-secondary btn-account-action" onclick="return confirm('Enable this customer account?')">
                             Enable Account
                         </button>
                     {% endif %}
                 </form>
             {% endif %}
-            <a href="{% url 'customers:staff_customer_list' %}" class="btn btn-secondary">← Back to List</a>
+            <a href="{% url 'customers:staff_customer_list' %}" class="btn btn-secondary btn-account-action">← Back to List</a>
         </div>
     </div>
     

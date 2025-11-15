@@ -1,23 +1,31 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{{ product.name }} · AuroraMart{% endblock %}
 {% block content %}
 <article class="card" style="display:grid; gap:1.5rem;">
-    <header>
-        <h1>{{ product.name }}</h1>
-        <p class="muted">{{ product.category.name }}{% if product.subcategory %} › {{ product.subcategory.name }}{% endif %}</p>
-    </header>
-    <p>{{ product.description }}</p>
-    <p><strong>Price:</strong> ${{ product.unit_price }}</p>
-    <p><strong>Rating:</strong> {{ product.product_rating|default:"N/A" }}/5.0</p>
-    {% if product.quantity_on_hand > 0 %}
-        <form method="post" class="form-grid" style="max-width:320px;">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Add to cart</button>
-        </form>
-    {% else %}
-        <p style="color:#b91c1c; font-weight:600;">Out of stock</p>
-    {% endif %}
+    <div style="display:grid; grid-template-columns:1fr 2fr; gap:2rem; align-items:start;">
+        <div>
+            <img src="{% static 'images/product-placeholder.svg' %}" alt="{{ product.name }}" style="width:100%; max-width:400px; height:auto; border-radius:0.5rem; background:#f3f4f6;">
+        </div>
+        <div>
+            <header>
+                <h1>{{ product.name }}</h1>
+                <p class="muted">{{ product.category.name }}{% if product.subcategory %} › {{ product.subcategory.name }}{% endif %}</p>
+            </header>
+            <p>{{ product.description }}</p>
+            <p><strong>Price:</strong> ${{ product.unit_price }}</p>
+            <p><strong>Rating:</strong> {{ product.product_rating|default:"N/A" }}/5.0</p>
+            {% if product.quantity_on_hand > 0 %}
+                <form method="post" class="form-grid" style="max-width:320px;">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Add to cart</button>
+                </form>
+            {% else %}
+                <p style="color:#b91c1c; font-weight:600;">Out of stock</p>
+            {% endif %}
+        </div>
+    </div>
 </article>
 
 {% if recommendations %}
@@ -26,6 +34,7 @@
     <div class="card-grid">
         {% for rec in recommendations %}
             <article class="card">
+                <img src="{% static 'images/product-placeholder.svg' %}" alt="{{ rec.name }}" style="width:100%; height:150px; object-fit:cover; border-radius:0.5rem; margin-bottom:0.75rem; background:#f3f4f6;">
                 <h3>{{ rec.name }}</h3>
                 <p class="muted">{{ rec.category.name }}</p>
                 <p>${{ rec.unit_price }}</p>

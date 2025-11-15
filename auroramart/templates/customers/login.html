@@ -17,10 +17,10 @@
         {% endif %}
         
         <div class="form-group">
-            {{ form.username.label_tag }}
-            {{ form.username }}
-            {% if form.username.errors %}
-                <span class="field-error">{{ form.username.errors.0 }}</span>
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {% if form.email.errors %}
+                <span class="field-error">{{ form.email.errors.0 }}</span>
             {% endif %}
         </div>
         
@@ -44,7 +44,7 @@
     </p>
     
     <p class="form-footer">
-        <a href="#">Forgot your password?</a>
+        <a href="{% url 'customers:password_reset' %}">Forgot your password?</a>
     </p>
 </div>
 {% endblock %}

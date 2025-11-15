@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -7,11 +9,14 @@ from django.views import View, generic
 from django.views.decorators.http import require_POST
 
 from catalog.models import Product, ProductCategory
+from customers.models import CustomerProfile
 from orders import services as order_services
 from recommendations.services import (
     predict_preferred_category,
     recommend_associated_products,
 )
+
+logger = logging.getLogger(__name__)
 
 from .forms import (
     AddToCartForm,
@@ -99,11 +104,32 @@ class OnboardingView(generic.FormView):
         if category_label:
             category = ProductCategory.objects.filter(name__iexact=category_label).first()
             self.request.session["onboarding_category"] = category_label
+            # Automatically enable recommendations after onboarding
+            self.request.session["show_recommendations"] = True
             if category:
                 messages.success(
                     self.request,
                     f"We think you'll love browsing {category.name}.",
                 )
+        
+        # Create or update CustomerProfile with onboarding data
+        if self.request.user.is_authenticated:
+            profile, created = CustomerProfile.objects.update_or_create(
+                user=self.request.user,
+                defaults={
+                    "age": onboarding_data["age"],
+                    "gender": onboarding_data["gender"],
+                    "employment_status": onboarding_data["employment_status"],
+                    "occupation": onboarding_data["occupation"],
+                    "education": onboarding_data["education"],
+                    "household_size": onboarding_data["household_size"],
+                    "has_children": onboarding_data.get("has_children", False),
+                    "monthly_income_sgd": onboarding_data["monthly_income_sgd"],
+                    "preferred_category_label": category_label or "",
+                    "preferred_category": category,
+                }
+            )
+        
         if not category_label:
             messages.info(
                 self.request, "Thanks! We'll show you our most popular products."
@@ -206,8 +232,11 @@ class ProductListView(generic.ListView):
                         pass
         
         if page_products and filters_applied:
-            # Use a sample of current page products (not all 20) for better focus
-            sample_skus = [p.sku for p in page_products[:5]]
+            # Use all products from current page for recommendations
+            all_page_skus = [p.sku for p in page_products]
+            
+            # Debug: Log the SKUs being used (first 10 for debugging)
+            logger.info(f"Explore Other Categories - Page has {len(all_page_skus)} products. First 10 SKUs: {all_page_skus[:10]}")
             
             # If no category filter from form, check if all products are from same category
             if not current_category and page_products:
@@ -218,29 +247,66 @@ class ProductListView(generic.ListView):
             # Strategy for "nudge exploration": Show products from OTHER categories
             if current_category:
                 # User is viewing a specific category - show products from OTHER categories
-                # Get association rule recommendations (no context needed, we filter by category anyway)
-                next_best = recommend_associated_products(sample_skus, limit=6, context_products=page_products[:5])
+                # Get MORE recommendations initially (12) so we have enough after filtering by category
+                next_best = recommend_associated_products(all_page_skus, limit=12, context_products=page_products)
+                logger.info(f"Got {len(next_best)} recommendations before category filter. Recommended SKUs: {[p.sku for p in next_best]}")
+                logger.info(f"Current category: {current_category.name if current_category else None}")
                 
                 # Filter to show products from OTHER categories (to encourage exploration)
                 next_best = [p for p in next_best if p.category != current_category]
+                logger.info(f"After category filter: {len(next_best)} recommendations. SKUs: {[p.sku for p in next_best]}")
                 
-                # If we don't have enough cross-category recommendations, add trending products from other categories
+                # If we don't have enough cross-category recommendations, add diverse products from other categories
                 if len(next_best) < 4:
-                    additional = (
-                        Product.objects.filter(
+                    # Use page products to create variety - hash the SKUs to get consistent but different results per page
+                    import hashlib
+                    page_hash = int(hashlib.md5(','.join(sorted(all_page_skus)).encode()).hexdigest()[:8], 16)
+                    
+                    # Get count of available products for offset calculation
+                    from django.db.models import Count
+                    total_count = Product.objects.filter(
+                        is_active=True
+                    ).exclude(
+                        category=current_category
+                    ).exclude(
+                        sku__in=[p.sku for p in next_best] + all_page_skus
+                    ).count()
+                    
+                    if total_count > 0:
+                        # Use hash to select different starting point for variety (max offset of 50)
+                        offset = min(page_hash % total_count, 50)
+                        
+                        # Get products with offset to vary selection based on page
+                        queryset = Product.objects.filter(
                             is_active=True
-                        )
-                        .exclude(category=current_category)
-                        .exclude(sku__in=[p.sku for p in next_best] + sample_skus)
-                        .order_by("-product_rating", "-quantity_on_hand", "-created_at")[:4 - len(next_best)]
-                    )
-                    next_best.extend(list(additional))
+                        ).exclude(
+                            category=current_category
+                        ).exclude(
+                            sku__in=[p.sku for p in next_best] + all_page_skus
+                        ).order_by("category", "-product_rating", "-quantity_on_hand", "-created_at")
+                        
+                        # Try with offset first
+                        additional = list(queryset[offset:offset + 20])
+                        if len(additional) < 10:
+                            # If not enough, also try from beginning
+                            additional.extend(list(queryset[:20]))
+                        
+                        # Take diverse products from different categories
+                        seen_categories = {p.category for p in next_best}
+                        diverse_products = []
+                        for p in additional:
+                            if p.category not in seen_categories or len(diverse_products) < (4 - len(next_best)):
+                                diverse_products.append(p)
+                                seen_categories.add(p.category)
+                            if len(diverse_products) >= (4 - len(next_best)):
+                                break
+                        next_best.extend(diverse_products)
                 
                 # Limit to 4 for display
                 next_best = next_best[:4]
             else:
                 # No specific category but filters applied (e.g., search query) - use association rules
-                next_best = recommend_associated_products(sample_skus, limit=4, context_products=page_products[:5])
+                next_best = recommend_associated_products(all_page_skus, limit=4, context_products=page_products)
             
             # If ML recommendations are ON, we can still respect it but prioritize exploration
             if show_recommendations and self.request.session.get('onboarding_category'):
@@ -268,7 +334,7 @@ class ProductListView(generic.ListView):
                                     is_active=True,
                                     category=predicted_category
                                 )
-                                .exclude(sku__in=[p.sku for p in next_best] + sample_skus)
+                                .exclude(sku__in=[p.sku for p in next_best] + all_page_skus)
                                 .order_by("-product_rating", "-quantity_on_hand")[:4 - len(next_best)]
                             )
                             next_best = list(additional)[:4]

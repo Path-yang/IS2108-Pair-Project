@@ -145,11 +145,15 @@ def recommend_associated_products(
         if sku and sku not in basket_skus and sku not in seen:
             unique_skus.append(sku)
             seen.add(sku)
-        if len(unique_skus) >= limit * 2:  # Get more to account for missing products
-            break
 
     # Fetch products from database
     products = list(Product.objects.filter(sku__in=unique_skus, is_active=True))
+    
+    # Reorder products to match unique_skus order (preserves confidence-based ordering)
+    # Create a mapping of SKU to index in unique_skus
+    sku_order = {sku: idx for idx, sku in enumerate(unique_skus)}
+    # Sort products by their position in unique_skus (products not in unique_skus go to end)
+    products = sorted(products, key=lambda p: sku_order.get(p.sku, 999))
 
     # If we didn't find enough products from association rules, supplement with context-aware fallback
     if len(products) < limit:

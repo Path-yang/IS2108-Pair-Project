@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Shop Products · AuroraMart{% endblock %}
 {% block content %}
 <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
@@ -27,30 +28,10 @@
     <button type="submit">Apply filters</button>
 </form>
 
-{% if next_best_action %}
-<section class="card" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; padding:1.5rem; margin-bottom:2rem; border-radius:0.5rem;">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
-        <div>
-            <h2 style="color:white; margin:0 0 0.5rem 0; font-size:1.5rem;">✨ Explore Other Categories</h2>
-            <p style="color:rgba(255,255,255,0.9); margin:0;">Discover products from different categories you might love</p>
-        </div>
-    </div>
-    <div class="card-grid" style="grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
-        {% for product in next_best_action %}
-            <article class="card" style="background:white; color:inherit;">
-                <h3 style="color:#1f2937; margin:0 0 0.5rem 0;">{{ product.name }}</h3>
-                <p class="muted" style="color:#6b7280; font-size:0.875rem; margin:0.25rem 0;">{{ product.category.name }}</p>
-                <p style="font-weight:700; color:#1f2937; margin:0.5rem 0;">${{ product.unit_price|floatformat:2 }}</p>
-                <a class="button" href="{% url 'storefront:product_detail' product.sku %}" style="background:#667eea; color:white; text-decoration:none; display:inline-block; padding:0.5rem 1rem; border-radius:0.25rem; text-align:center;">View details</a>
-            </article>
-        {% endfor %}
-    </div>
-</section>
-{% endif %}
-
 <section class="card-grid">
     {% for product in products %}
         <article class="card">
+            <img src="{% static 'images/product-placeholder.svg' %}" alt="{{ product.name }}" style="width:100%; height:200px; object-fit:cover; border-radius:0.5rem; margin-bottom:1rem; background:#f3f4f6;">
             <h3>{{ product.name }}</h3>
             <p class="muted">{{ product.category.name }}{% if product.subcategory %} › {{ product.subcategory.name }}{% endif %}</p>
             <p style="font-weight:700;">${{ product.unit_price }}</p>
@@ -74,6 +55,27 @@
     </div>
 {% endif %}
 
+{% if next_best_action %}
+<section class="card" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; padding:1.5rem; margin-top:2rem; border-radius:0.5rem;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+        <div>
+            <h2 style="color:white; margin:0 0 0.5rem 0; font-size:1.5rem;">✨ Explore Other Categories</h2>
+            <p style="color:rgba(255,255,255,0.9); margin:0;">Discover products from different categories you might love</p>
+        </div>
+    </div>
+    <div class="card-grid" style="grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+        {% for product in next_best_action %}
+            <article class="card" style="background:white; color:inherit;">
+                <img src="{% static 'images/product-placeholder.svg' %}" alt="{{ product.name }}" style="width:100%; height:150px; object-fit:cover; border-radius:0.5rem; margin-bottom:0.75rem; background:#f3f4f6;">
+                <h3 style="color:#1f2937; margin:0 0 0.5rem 0;">{{ product.name }}</h3>
+                <p class="muted" style="color:#6b7280; font-size:0.875rem; margin:0.25rem 0;">{{ product.category.name }}</p>
+                <p style="font-weight:700; color:#1f2937; margin:0.5rem 0;">${{ product.unit_price|floatformat:2 }}</p>
+                <a class="button" href="{% url 'storefront:product_detail' product.sku %}" style="background:#667eea; color:white; text-decoration:none; display:inline-block; padding:0.5rem 1rem; border-radius:0.25rem; text-align:center;">View details</a>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 
 {% if onboarding_category %}
 <script>

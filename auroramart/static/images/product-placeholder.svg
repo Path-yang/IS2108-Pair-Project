@@ -1,0 +1,6 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#e5e7eb"/>
+  <rect x="10" y="10" width="380" height="380" fill="none" stroke="#9ca3af" stroke-width="2"/>
+  <text x="200" y="190" font-family="Arial, sans-serif" font-size="24" fill="#6b7280" text-anchor="middle" dominant-baseline="middle">Product Image</text>
+</svg>
+

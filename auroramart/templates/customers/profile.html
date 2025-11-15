@@ -202,10 +202,10 @@
 
             <div class="form-grid">
                 <div class="form-group">
-                    {{ profile_form.education_level.label_tag }}
-                    {{ profile_form.education_level }}
-                    {% if profile_form.education_level.errors %}
-                        <span class="field-error">{{ profile_form.education_level.errors.0 }}</span>
+                    {{ profile_form.education.label_tag }}
+                    {{ profile_form.education }}
+                    {% if profile_form.education.errors %}
+                        <span class="field-error">{{ profile_form.education.errors.0 }}</span>
                     {% endif %}
                 </div>
 
@@ -245,4 +245,13 @@
         </section>
     </div>
 </form>
+
+<section class="profile-section" style="border-top: 2px solid #dc2626; margin-top: 2rem;">
+    <h2 style="color: #dc2626;">Danger Zone</h2>
+    <p class="muted" style="margin-bottom: 1rem;">Permanently delete your account. This action cannot be undone.</p>
+    <form method="post" action="{% url 'customers:delete_account' %}" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone and you will be logged out immediately.');">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="background: #dc2626; color: white;">Delete My Account</button>
+    </form>
+</section>
 {% endblock %}

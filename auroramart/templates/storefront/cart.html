@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Your Cart · AuroraMart{% endblock %}
 {% block content %}
 <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
@@ -97,8 +98,13 @@
                 {% for item in items %}
                     <tr style="border-bottom:1px solid #e5e7eb;">
                         <td style="padding:0.75rem; text-align:left !important; vertical-align:top;">
-                            <strong>{{ item.product.name }}</strong>
-                            <p class="muted" style="margin:0.25rem 0 0 0; font-size:0.875rem;">{{ item.product.sku }}</p>
+                            <div style="display:flex; gap:0.75rem; align-items:center;">
+                                <img src="{% static 'images/product-placeholder.svg' %}" alt="{{ item.product.name }}" style="width:60px; height:60px; object-fit:cover; border-radius:0.25rem; background:#f3f4f6; flex-shrink:0;">
+                                <div>
+                                    <strong>{{ item.product.name }}</strong>
+                                    <p class="muted" style="margin:0.25rem 0 0 0; font-size:0.875rem;">{{ item.product.sku }}</p>
+                                </div>
+                            </div>
                         </td>
                         <td style="padding:0.75rem; text-align:center !important; vertical-align:middle;">${{ item.unit_price|floatformat:2 }}</td>
                         <td style="padding:0.75rem; text-align:center !important; vertical-align:middle;">
@@ -140,6 +146,7 @@
     <div class="card-grid">
         {% for rec in recommendations %}
             <article class="card">
+                <img src="{% static 'images/product-placeholder.svg' %}" alt="{{ rec.name }}" style="width:100%; height:150px; object-fit:cover; border-radius:0.5rem; margin-bottom:0.75rem; background:#f3f4f6;">
                 <h3>{{ rec.name }}</h3>
                 <p class="muted">{{ rec.category.name }}</p>
                 <p>${{ rec.unit_price }}</p>

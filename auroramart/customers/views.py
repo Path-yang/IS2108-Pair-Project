@@ -1,11 +1,11 @@
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views import generic
 
 from orders.models import Order
@@ -13,6 +13,7 @@ from orders.models import Order
 from .forms import (
     CustomerProfileForm,
     CustomerRegistrationForm,
+    EmailAuthenticationForm,
     UserProfileUpdateForm,
 )
 from .models import CustomerProfile
@@ -21,6 +22,30 @@ from .models import CustomerProfile
 def healthcheck(request):
     """Simple healthcheck placeholder for API wiring."""
     return JsonResponse({"status": "ok"})
+
+
+class CustomerLoginView(generic.FormView):
+    """Custom login view that accepts email instead of username."""
+    
+    template_name = "customers/login.html"
+    form_class = EmailAuthenticationForm
+    success_url = reverse_lazy("storefront:home")
+    
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("storefront:home")
+        return super().get(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        user = form.get_user()
+        login(self.request, user)
+        messages.success(self.request, f"Welcome back, {user.first_name or user.username}!")
+        
+        # Handle 'next' redirect
+        next_url = self.request.GET.get('next', '')
+        if next_url:
+            return redirect(next_url)
+        return redirect(self.success_url)
 
 
 class CustomerRegistrationView(generic.CreateView):
@@ -58,6 +83,21 @@ class CustomerProfileView(LoginRequiredMixin, generic.TemplateView):
         except CustomerProfile.DoesNotExist:
             ctx["profile_form"] = CustomerProfileForm()
             ctx["has_profile"] = False
+            # If user has onboarding category in session but no profile, suggest completing onboarding
+            if self.request.session.get("onboarding_category"):
+                messages.info(
+                    self.request,
+                    "Complete your profile by filling in the personal information below, or "
+                    "<a href='{}'>complete onboarding again</a> to auto-fill your data.".format(
+                        reverse("storefront:onboarding")
+                    ),
+                    extra_tags="safe"
+                )
+            else:
+                messages.info(
+                    self.request,
+                    "Please fill in your personal information below to complete your profile."
+                )
         return ctx
     
     def post(self, request, *args, **kwargs):
@@ -104,6 +144,43 @@ class OrderHistoryView(LoginRequiredMixin, generic.ListView):
             return Order.objects.filter(customer=profile).order_by("-created_at")
         except CustomerProfile.DoesNotExist:
             return Order.objects.none()
+
+
+class DeleteAccountView(LoginRequiredMixin, generic.View):
+    """Allow customers to delete their own account."""
+    
+    login_url = "customers:login"
+    
+    def post(self, request):
+        user = request.user
+        
+        # Prevent staff from deleting their account through this view
+        if user.is_staff:
+            messages.error(request, "Staff accounts cannot be deleted through this page.")
+            return redirect("customers:profile")
+        
+        # Get user's profile if it exists
+        try:
+            profile = user.customer_profile
+        except CustomerProfile.DoesNotExist:
+            profile = None
+        
+        # Set orders.customer to NULL before deletion (since Order has PROTECT)
+        # This preserves order history but removes the link to the user
+        if profile:
+            Order.objects.filter(customer=profile).update(customer=None)
+        
+        # Store username for message
+        username = user.username
+        
+        # Delete the user (this will cascade delete the CustomerProfile due to CASCADE)
+        user.delete()
+        
+        # Log out the user
+        logout(request)
+        
+        messages.success(request, f"Your account ({username}) has been permanently deleted.")
+        return redirect("storefront:home")
 
 
 # Staff-only views for customer management (ADM-09, ADM-10, ADM-11)

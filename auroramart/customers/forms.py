@@ -29,6 +29,26 @@ class CustomerRegistrationForm(UserCreationForm):
 class CustomerProfileForm(forms.ModelForm):
     """Form for editing customer profile information."""
     
+    occupation = forms.ChoiceField(
+        choices=[
+            ("Sales", "Sales"),
+            ("Service", "Service"),
+            ("Admin", "Admin"),
+            ("Tech", "Tech"),
+            ("Education", "Education"),
+            ("Skilled Trades", "Skilled Trades"),
+        ]
+    )
+    education = forms.ChoiceField(
+        choices=[
+            ("Secondary", "Secondary"),
+            ("Diploma", "Diploma"),
+            ("Bachelor", "Bachelor"),
+            ("Masters", "Masters"),
+            ("Doctorate", "Doctorate"),
+        ]
+    )
+    
     class Meta:
         model = CustomerProfile
         fields = [
@@ -54,3 +74,67 @@ class UserProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email"]
+
+
+class EmailAuthenticationForm(forms.Form):
+    """Custom login form that accepts email instead of username."""
+    
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(attrs={'autofocus': True, 'placeholder': 'Enter your email address'})
+    )
+    password = forms.CharField(
+        label="Password",
+        strip=False,
+        widget=forms.PasswordInput(attrs={'placeholder': 'Enter your password'})
+    )
+    
+    error_messages = {
+        'invalid_login': "Please enter a correct email and password.",
+        'inactive': "This account is inactive.",
+    }
+    
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request
+        self.user_cache = None
+        super().__init__(*args, **kwargs)
+    
+    def clean(self):
+        email = self.cleaned_data.get('email')
+        password = self.cleaned_data.get('password')
+        
+        if email and password:
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                raise forms.ValidationError(
+                    self.error_messages['invalid_login'],
+                    code='invalid_login',
+                )
+            except User.MultipleObjectsReturned:
+                # If multiple users have same email, get the first active one
+                user = User.objects.filter(email=email, is_active=True).first()
+                if not user:
+                    raise forms.ValidationError(
+                        self.error_messages['invalid_login'],
+                        code='invalid_login',
+                    )
+            
+            if not user.check_password(password):
+                raise forms.ValidationError(
+                    self.error_messages['invalid_login'],
+                    code='invalid_login',
+                )
+            
+            if not user.is_active:
+                raise forms.ValidationError(
+                    self.error_messages['inactive'],
+                    code='inactive',
+                )
+            
+            self.user_cache = user
+        
+        return self.cleaned_data
+    
+    def get_user(self):
+        return self.user_cache

@@ -28,6 +28,20 @@
     <button type="submit">Apply filters</button>
 </form>
 
+<style>
+/* Ensure subcategory select is clickable when enabled */
+#id_subcategory:not(:disabled) {
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+#id_subcategory:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background-color: #f3f4f6;
+}
+</style>
+
 <section class="card-grid">
     {% for product in products %}
         <article class="card">
@@ -129,20 +143,28 @@ document.addEventListener('DOMContentLoaded', function() {
             // Clear subcategory options
             subcategorySelect.innerHTML = '<option value="">---------</option>';
             
-            if (selectedCategoryId && allSubcategories[selectedCategoryId]) {
-                // Add subcategories for selected category
-                allSubcategories[selectedCategoryId].forEach(function(subcat) {
+            // Convert to number for comparison (category select value is string)
+            const categoryIdNum = selectedCategoryId ? parseInt(selectedCategoryId, 10) : null;
+            
+            if (categoryIdNum && allSubcategories[categoryIdNum] && allSubcategories[categoryIdNum].length > 0) {
+                // Enable subcategory dropdown and add subcategories for selected category
+                subcategorySelect.disabled = false;
+                subcategorySelect.style.pointerEvents = 'auto';
+                subcategorySelect.style.cursor = 'pointer';
+                allSubcategories[categoryIdNum].forEach(function(subcat) {
                     const option = document.createElement('option');
                     option.value = subcat.id;
                     option.textContent = subcat.name;
-                    if (currentSubcategoryId && currentSubcategoryId == subcat.id) {
+                    if (currentSubcategoryId && parseInt(currentSubcategoryId, 10) == subcat.id) {
                         option.selected = true;
                     }
                     subcategorySelect.appendChild(option);
                 });
             } else {
-                // If no category selected or category has no subcategories, keep it empty
-                subcategorySelect.disabled = !selectedCategoryId;
+                // If no category selected or category has no subcategories, disable it
+                subcategorySelect.disabled = true;
+                subcategorySelect.style.pointerEvents = 'none';
+                subcategorySelect.style.cursor = 'not-allowed';
             }
         }
         
@@ -154,7 +176,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Initialize subcategories on page load
+        // Always call updateSubcategories to set initial state
         updateSubcategories();
+        
+        // Also handle case where form is submitted and page reloads with category selected
+        // Re-run updateSubcategories after a short delay to ensure DOM is ready
+        setTimeout(function() {
+            updateSubcategories();
+        }, 100);
     }
 });
 </script>

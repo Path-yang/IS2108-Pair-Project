@@ -89,6 +89,7 @@ class ProductFilterForm(forms.Form):
         else:
             # If no category selected, show no subcategories (user must select category first)
             self.fields["subcategory"].queryset = ProductSubcategory.objects.none()
+            # Don't disable the field - let JavaScript handle it
 
 
 class AddToCartForm(forms.Form):

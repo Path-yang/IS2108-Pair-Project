@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views import View, generic
 from django.views.decorators.http import require_POST
 
-from catalog.models import Product, ProductCategory
+from catalog.models import Product, ProductCategory, ProductSubcategory
 from customers.models import CustomerProfile
 from orders import services as order_services
 from recommendations.services import (

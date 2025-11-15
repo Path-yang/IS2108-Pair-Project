@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -38,8 +39,18 @@ class HomeView(generic.TemplateView):
         show_recommendations = self.request.session.get('show_recommendations', False)
         ctx["show_recommendations"] = show_recommendations
 
-        # Get onboarding data from session
+        # Get onboarding category from session, or fallback to user's profile if available
         onboarding_category = self.request.session.get('onboarding_category')
+        if not onboarding_category and self.request.user.is_authenticated:
+            try:
+                profile = self.request.user.customer_profile
+                if profile and profile.preferred_category_label:
+                    onboarding_category = profile.preferred_category_label
+                    # Restore it to session for consistency
+                    self.request.session['onboarding_category'] = onboarding_category
+            except CustomerProfile.DoesNotExist:
+                pass
+        
         ctx["onboarding_category"] = onboarding_category
 
         # Always show featured categories
@@ -199,7 +210,20 @@ class ProductListView(generic.ListView):
         # Pass toggle state and onboarding data to template
         show_recommendations = self.request.session.get('show_recommendations', False)
         ctx["show_recommendations"] = show_recommendations
-        ctx["onboarding_category"] = self.request.session.get('onboarding_category')
+        
+        # Get onboarding category from session, or fallback to user's profile if available
+        onboarding_category = self.request.session.get('onboarding_category')
+        if not onboarding_category and self.request.user.is_authenticated:
+            try:
+                profile = self.request.user.customer_profile
+                if profile and profile.preferred_category_label:
+                    onboarding_category = profile.preferred_category_label
+                    # Restore it to session for consistency
+                    self.request.session['onboarding_category'] = onboarding_category
+            except CustomerProfile.DoesNotExist:
+                pass
+        
+        ctx["onboarding_category"] = onboarding_category
 
         # Add "Next best action" recommendations to nudge exploration
         # ONLY show when filters are applied (category, subcategory, or search)
@@ -420,10 +444,13 @@ class CartView(View):
     def get(self, request):
         basket = order_services.get_or_create_session_basket(request)
         items = basket.items.select_related("product")
-        item_products = [item.product for item in items]
-        recommendations = recommend_associated_products(
-            [item.product.sku for item in items], limit=4, context_products=item_products
-        )
+        recommendations = None
+        # Only show "Complete the set" recommendations if cart has items
+        if items.exists():
+            item_products = [item.product for item in items]
+            recommendations = recommend_associated_products(
+                [item.product.sku for item in items], limit=4, context_products=item_products
+            )
         update_form = UpdateCartForm()
         return render(
             request,
@@ -437,6 +464,21 @@ class CartView(View):
         )
 
     def post(self, request):
+        # Check if this is an add to cart request from "Complete the set"
+        if "add_product_sku" in request.POST:
+            sku = request.POST.get("add_product_sku")
+            try:
+                product = Product.objects.get(sku=sku, is_active=True)
+                if product.quantity_on_hand > 0:
+                    basket = order_services.get_or_create_session_basket(request)
+                    order_services.add_product_to_basket(basket, product, quantity=1)
+                    messages.success(request, f"{product.name} added to your cart.")
+                else:
+                    messages.error(request, f"{product.name} is out of stock.")
+            except Product.DoesNotExist:
+                messages.error(request, "Product not found.")
+            return redirect("storefront:cart")
+        
         # Check if this is a delete request
         if "delete_item" in request.POST:
             item_id = request.POST.get("line_id")
@@ -467,9 +509,10 @@ class CartView(View):
         return redirect("storefront:cart")
 
 
-class ShippingView(View):
+class ShippingView(LoginRequiredMixin, View):
     template_name = "storefront/checkout_shipping.html"
     form_class = ShippingAddressForm
+    login_url = "customers:login"
 
     def get(self, request):
         initial = request.session.get("checkout_shipping", {})
@@ -484,9 +527,10 @@ class ShippingView(View):
         return render(request, self.template_name, {"form": form})
 
 
-class PaymentView(View):
+class PaymentView(LoginRequiredMixin, View):
     template_name = "storefront/checkout_payment.html"
     form_class = PaymentForm
+    login_url = "customers:login"
 
     def get(self, request):
         initial = request.session.get("checkout_payment", {})
@@ -504,8 +548,9 @@ class PaymentView(View):
         return render(request, self.template_name, {"form": form})
 
 
-class ReviewView(View):
+class ReviewView(LoginRequiredMixin, View):
     template_name = "storefront/checkout_review.html"
+    login_url = "customers:login"
 
     def get(self, request):
         basket = order_services.get_or_create_session_basket(request)
@@ -534,8 +579,9 @@ class ReviewView(View):
         return redirect("storefront:checkout_complete")
 
 
-class ConfirmationView(generic.TemplateView):
+class ConfirmationView(LoginRequiredMixin, generic.TemplateView):
     template_name = "storefront/checkout_complete.html"
+    login_url = "customers:login"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

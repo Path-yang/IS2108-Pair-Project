@@ -39,7 +39,6 @@ class CustomerLoginView(generic.FormView):
     def form_valid(self, form):
         user = form.get_user()
         login(self.request, user)
-        messages.success(self.request, f"Welcome back, {user.first_name or user.username}!")
         
         # Handle 'next' redirect
         next_url = self.request.GET.get('next', '')

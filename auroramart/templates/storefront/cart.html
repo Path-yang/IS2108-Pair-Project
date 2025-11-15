@@ -8,7 +8,11 @@
         <p class="muted">Review items, adjust quantities, and proceed to checkout.</p>
     </div>
     {% if basket.total_items %}
-        <a class="button" href="{% url 'storefront:checkout_shipping' %}">Proceed to checkout</a>
+        {% if user.is_authenticated %}
+            <a class="button" href="{% url 'storefront:checkout_shipping' %}">Proceed to checkout</a>
+        {% else %}
+            <a class="button" href="{% url 'customers:login' %}?next={% url 'storefront:checkout_shipping' %}">Log in to checkout</a>
+        {% endif %}
     {% endif %}
 </header>
 
@@ -150,7 +154,14 @@
                 <h3>{{ rec.name }}</h3>
                 <p class="muted">{{ rec.category.name }}</p>
                 <p>${{ rec.unit_price }}</p>
-                <a class="button" href="{% url 'storefront:product_detail' rec.sku %}">Add to cart</a>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <form method="post" style="display:inline; margin:0; flex:1;">
+                        {% csrf_token %}
+                        <input type="hidden" name="add_product_sku" value="{{ rec.sku }}">
+                        <button type="submit" class="button" style="width:100%;">Add to cart</button>
+                    </form>
+                    <a class="button" href="{% url 'storefront:product_detail' rec.sku %}" style="background:#6b7280; text-decoration:none; display:inline-block; padding:0.5rem 1rem; border-radius:0.25rem; text-align:center; flex:1;">View details</a>
+                </div>
             </article>
         {% endfor %}
     </div>

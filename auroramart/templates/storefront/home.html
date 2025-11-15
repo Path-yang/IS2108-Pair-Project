@@ -2,17 +2,6 @@
 {% load static %}
 {% block title %}AuroraMart · Personalised Storefront{% endblock %}
 {% block content %}
-<section class="hero card" style="display:grid; gap:1.5rem; align-items:center;">
-    <div>
-        <h1>Everyday quality without the luxury markup.</h1>
-        <p>Discover curated picks based on your lifestyle, powered by AuroraMart's AI-first storefront.</p>
-        <div style="display:flex; gap:0.75rem; margin-top:1rem; align-items:center; flex-wrap:wrap;">
-            <a class="button" href="{% url 'storefront:onboarding' %}">Personalise my experience</a>
-            <a class="button" href="{% url 'storefront:product_list' %}" style="background:#6b7280;">Browse all products</a>
-        </div>
-    </div>
-</section>
-
 <section style="margin-top:2rem;">
     <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
         <div>

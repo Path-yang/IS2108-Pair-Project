@@ -112,11 +112,13 @@
                         </td>
                         <td style="padding:0.75rem; text-align:center !important; vertical-align:middle;">${{ item.unit_price|floatformat:2 }}</td>
                         <td style="padding:0.75rem; text-align:center !important; vertical-align:middle;">
-                            <form method="post" style="display:flex; gap:0.5rem; align-items:center; justify-content:center; margin:0;">
+                            <form method="post" class="quantity-form" data-max-quantity="{{ item.product.quantity_on_hand }}" style="display:flex; gap:0.25rem; align-items:center; justify-content:center; margin:0;">
                                 {% csrf_token %}
                                 <input type="hidden" name="line_id" value="{{ item.id }}">
-                                <input type="number" name="quantity" value="{{ item.quantity }}" min="0" max="{{ item.product.quantity_on_hand }}" style="width:70px; padding:0.25rem; text-align:center;">
-                                <button type="submit" style="background:#1a73e8; color:white; border:none; padding:0.375rem 0.75rem; border-radius:0.25rem; cursor:pointer;">Update</button>
+                                <input type="hidden" name="quantity" class="quantity-input" value="{{ item.quantity }}">
+                                <button type="button" class="quantity-decrease-btn" style="background:#6b7280; color:white; border:none; padding:0.375rem 0.625rem; border-radius:0.25rem; cursor:pointer; font-weight:bold; min-width:32px;">−</button>
+                                <span class="quantity-display" style="min-width:40px; text-align:center; font-weight:500; padding:0 0.5rem;">{{ item.quantity }}</span>
+                                <button type="button" class="quantity-increase-btn" style="background:#1a73e8; color:white; border:none; padding:0.375rem 0.625rem; border-radius:0.25rem; cursor:pointer; font-weight:bold; min-width:32px;">+</button>
                             </form>
                         </td>
                         <td style="padding:0.75rem; text-align:right !important; font-weight:600; vertical-align:middle;">${{ item.line_total|floatformat:2 }}</td>
@@ -249,6 +251,19 @@
     display: flex;
     justify-content: flex-end;
 }
+
+.quantity-decrease-btn:hover {
+    background: #4b5563 !important;
+}
+
+.quantity-increase-btn:hover {
+    background: #1557b0 !important;
+}
+
+.quantity-decrease-btn:active,
+.quantity-increase-btn:active {
+    transform: scale(0.95);
+}
 </style>
 
 <script>
@@ -289,6 +304,47 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
             modal.style.display = 'none';
         }
+    });
+
+    // Quantity increase/decrease buttons
+    const quantityForms = document.querySelectorAll('.quantity-form');
+    
+    quantityForms.forEach(form => {
+        const decreaseBtn = form.querySelector('.quantity-decrease-btn');
+        const increaseBtn = form.querySelector('.quantity-increase-btn');
+        const quantityInput = form.querySelector('.quantity-input');
+        const quantityDisplay = form.querySelector('.quantity-display');
+        const maxQuantity = parseInt(form.getAttribute('data-max-quantity'));
+        
+        decreaseBtn.addEventListener('click', function() {
+            let currentQuantity = parseInt(quantityInput.value);
+            if (currentQuantity > 1) {
+                currentQuantity -= 1;
+                quantityInput.value = currentQuantity;
+                quantityDisplay.textContent = currentQuantity;
+                form.submit();
+            } else if (currentQuantity === 1) {
+                // If quantity would be 0, show delete confirmation
+                const itemId = form.querySelector('input[name="line_id"]').value;
+                const itemName = form.closest('tr').querySelector('strong').textContent;
+                itemIdInput.value = itemId;
+                itemNameSpan.textContent = itemName;
+                modal.style.display = 'flex';
+            }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+            let currentQuantity = parseInt(quantityInput.value);
+            if (currentQuantity < maxQuantity) {
+                currentQuantity += 1;
+                quantityInput.value = currentQuantity;
+                quantityDisplay.textContent = currentQuantity;
+                form.submit();
+            } else {
+                // Show message that max quantity reached
+                alert(`Only ${maxQuantity} units available in stock.`);
+            }
+        });
     });
 });
 </script>

@@ -21,6 +21,30 @@ class ProductForm(forms.ModelForm):
         widgets = {
             "description": forms.Textarea(attrs={"rows": 4}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Get category from data or initial or instance
+        category = None
+        if self.data:
+            category = self.data.get("category")
+        elif self.initial:
+            category = self.initial.get("category")
+        elif self.instance and self.instance.pk:
+            category = self.instance.category_id
+        
+        # Filter subcategories based on selected category
+        if category:
+            try:
+                category_id = int(category)
+                self.fields["subcategory"].queryset = ProductSubcategory.objects.filter(
+                    category_id=category_id
+                )
+            except (ValueError, TypeError):
+                self.fields["subcategory"].queryset = ProductSubcategory.objects.none()
+        else:
+            # If no category selected, show no subcategories (user must select category first)
+            self.fields["subcategory"].queryset = ProductSubcategory.objects.none()
 
 
 class ProductCategoryForm(forms.ModelForm):

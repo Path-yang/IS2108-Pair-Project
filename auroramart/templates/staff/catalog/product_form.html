@@ -6,8 +6,92 @@
     <form method="post" class="form-grid">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">{% if view.object %}Save changes{% else %}Create product{% endif %}</button>
-        <a class="button" href="{% url 'catalog:product_list' %}" style="background:#6b7280; margin-left:0.5rem;">Cancel</a>
+        <div style="display:flex; flex-direction:column; gap:0.5rem; align-items:center; margin-top:1rem;">
+            <button type="submit" style="width:100%; max-width:300px; text-align:center;">{% if view.object %}Save changes{% else %}Create product{% endif %}</button>
+            <a class="button" href="{% url 'catalog:product_list' %}" style="background:#6b7280; width:100%; max-width:300px; text-align:center; text-decoration:none; display:inline-block;">Cancel</a>
+        </div>
     </form>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('id_category');
+    const subcategorySelect = document.getElementById('id_subcategory');
+    
+    if (categorySelect && subcategorySelect) {
+        // Store all subcategories data grouped by category
+        const allSubcategories = {};
+        {% for subcat in all_subcategories %}
+        if (!allSubcategories[{{ subcat.category.id }}]) {
+            allSubcategories[{{ subcat.category.id }}] = [];
+        }
+        allSubcategories[{{ subcat.category.id }}].push({
+            id: {{ subcat.id }},
+            name: "{{ subcat.name|escapejs }}"
+        });
+        {% endfor %}
+        
+        function updateSubcategories() {
+            const selectedCategoryId = categorySelect.value;
+            const currentSubcategoryId = subcategorySelect.value;
+            
+            // Clear subcategory options
+            subcategorySelect.innerHTML = '<option value="">---------</option>';
+            
+            // Convert to number for comparison (category select value is string)
+            const categoryIdNum = selectedCategoryId ? parseInt(selectedCategoryId, 10) : null;
+            
+            if (categoryIdNum && allSubcategories[categoryIdNum] && allSubcategories[categoryIdNum].length > 0) {
+                // Enable subcategory dropdown and add subcategories for selected category
+                subcategorySelect.disabled = false;
+                subcategorySelect.style.pointerEvents = 'auto';
+                subcategorySelect.style.cursor = 'pointer';
+                allSubcategories[categoryIdNum].forEach(function(subcat) {
+                    const option = document.createElement('option');
+                    option.value = subcat.id;
+                    option.textContent = subcat.name;
+                    if (currentSubcategoryId && parseInt(currentSubcategoryId, 10) == subcat.id) {
+                        option.selected = true;
+                    }
+                    subcategorySelect.appendChild(option);
+                });
+            } else {
+                // If no category selected or category has no subcategories, disable it
+                subcategorySelect.disabled = true;
+                subcategorySelect.style.pointerEvents = 'none';
+                subcategorySelect.style.cursor = 'not-allowed';
+            }
+        }
+        
+        // Update subcategories when category changes
+        categorySelect.addEventListener('change', function() {
+            // Clear subcategory selection when category changes
+            subcategorySelect.value = '';
+            updateSubcategories();
+        });
+        
+        // Initialize subcategories on page load
+        updateSubcategories();
+        
+        // Also handle case where form is submitted and page reloads with category selected
+        setTimeout(function() {
+            updateSubcategories();
+        }, 100);
+    }
+});
+</script>
+
+<style>
+/* Ensure subcategory select is clickable when enabled */
+#id_subcategory:not(:disabled) {
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+#id_subcategory:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background-color: #f3f4f6;
+}
+</style>
 {% endblock %}

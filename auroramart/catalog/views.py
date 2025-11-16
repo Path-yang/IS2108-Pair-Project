@@ -133,6 +133,11 @@ class ProductCreateView(StaffRequiredMixin, generic.CreateView):
     form_class = ProductForm
     success_url = reverse_lazy("catalog:product_list")
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["all_subcategories"] = ProductSubcategory.objects.select_related("category").all()
+        return ctx
+
     def form_valid(self, form):
         messages.success(self.request, "Product added to catalogue.")
         return super().form_valid(form)
@@ -143,6 +148,11 @@ class ProductUpdateView(StaffRequiredMixin, generic.UpdateView):
     form_class = ProductForm
     model = Product
     success_url = reverse_lazy("catalog:product_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["all_subcategories"] = ProductSubcategory.objects.select_related("category").all()
+        return ctx
 
     def form_valid(self, form):
         messages.success(self.request, "Product details updated.")
